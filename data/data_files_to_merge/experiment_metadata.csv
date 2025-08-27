@@ -23,3 +23,4 @@ Sanofi_goods,Pure,Microfluidic,mRNA,goldman,Mouse,hEPO,muscle,im,3,Sanofi_goods,
 Li_enzyme_catalyzed,Pure,Hand,mRNA,li_enzyme,HEK293T,FFL,generic_cell,in_vitro,1,Li_enzyme_catalyzed,max,Individual,Luminescence,Li_enzyme_catalyzed
 He_4CR_aldehyde,Pure,Hand,mRNA,he_chem,Mouse,FFL,,iv,3,He_4CR_aldehyde,max,Individual,log luminescence,He_4CR_aldehyde
 Chen_disulfide,Pure,Hand,mRNA,chen_disulfide,,FFL,,,,Chen_disulfide,max,Individual,,Chen_disulfide
+Chinese_Academy_of_Sciences,Pure,Microfluidic,mRNA,ccchina,,FFL,,,,Chinese_Academy_of_Sciences,max,Individual,luminescence,Chinese_Academy_of_Sciences

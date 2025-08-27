@@ -1,4 +1,4 @@
-Lipid_name,Amine,Tail,Delivery_target,Route_of_administration,Purity,Batch_or_individual,Experiment_weight,Mix_type
+Lipid_name,Amine,Tail,Delivery_target,Route_of_administration,Purity,Batch_or_individual_or_barcoded,Experiment_weight,Mix_type
 A11-T1 ,RM_carbonate_A11,RM_carbonate_T1 ,hela,in_vitro,Crude,Individual,1,Hand
 A11-T2 ,RM_carbonate_A11,RM_carbonate_T2 ,hela,in_vitro,Crude,Individual,1,Hand
 A9-T1 ,RM_carbonate_A9,RM_carbonate_T1 ,hela,in_vitro,Crude,Individual,1,Hand

@@ -1,0 +1,30 @@
+{
+  "regression_targets": [
+    "Biodistribution_heart",
+    "Biodistribution_kidney",
+    "Biodistribution_liver",
+    "Biodistribution_lung",
+    "Biodistribution_lymph_nodes",
+    "Biodistribution_muscle",
+    "Biodistribution_spleen",
+    "quantified_delivery",
+    "quantified_total_luminescence"
+  ],
+  "classification_targets": [
+    "Delivery_target_dendritic_cell",
+    "Delivery_target_generic_cell",
+    "Delivery_target_liver",
+    "Delivery_target_lung",
+    "Delivery_target_lung_epithelium",
+    "Delivery_target_lymph_nodes",
+    "Delivery_target_macrophage",
+    "Delivery_target_muscle",
+    "Delivery_target_spleen",
+    "Encapsulation_Efficiency_50<=EE<80",
+    "Encapsulation_Efficiency_80<EE<=100",
+    "Encapsulation_Efficiency_EE<50",
+    "acute_toxicity_none",
+    "acute_toxicity_present",
+    "chronic_toxicity_none"
+  ]
+}

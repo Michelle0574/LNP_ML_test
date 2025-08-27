@@ -15,3 +15,4 @@ Experiment_ID,Miller_zwitter_lipids,Amine,train
 Experiment_ID,Zhou_dendrimer,Amine,split
 Experiment_ID,Lee_unsat_dendrimer,Amine,train
 Library_ID,4CR_Ketone,smiles,train
+Experiment_ID,Chinese_Academy_of_Sciences,smiles,split

@@ -38,3 +38,132 @@ Ensemble test rmse = 0.826890
 	Seed 42 ==> test rmse = 0.826890
 Overall test rmse = 0.826890 +/- 0.000000
 Elapsed time = 0:06:58
+Fold 0
+Model 0 best validation rmse = 0.193757 on epoch 40
+Model 0 test rmse = 0.250701
+Ensemble test rmse = 0.147050
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.147050
+Overall test rmse = 0.147050 +/- 0.000000
+Elapsed time = 2:12:15
+Fold 0
+Model 0 best validation rmse = 0.812480 on epoch 2
+Model 0 test rmse = 0.334568
+Ensemble test rmse = 0.334568
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.334568
+Overall test rmse = 0.334568 +/- 0.000000
+Elapsed time = 0:20:12
+Fold 0
+Model 0 best validation rmse = 0.164627 on epoch 8
+Model 0 test rmse = 0.311840
+Ensemble test rmse = 0.184251
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.184251
+Overall test rmse = 0.184251 +/- 0.000000
+Elapsed time = 2:07:55
+Fold 0
+Fold 0
+Model 0 best validation rmse = 0.163188 on epoch 0
+Model 0 test rmse = 0.255783
+Ensemble test rmse = 0.138102
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.138102
+Overall test rmse = 0.138102 +/- 0.000000
+Elapsed time = 0:27:25
+Fold 0
+Model 0 best validation auc = 0.825582 on epoch 9
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Model 0 test auc = 0.858814
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Ensemble test auc = nan
+1-fold cross validation
+	Seed 42 ==> test auc = nan
+Overall test auc = nan +/- nan
+Elapsed time = 0:27:57
+Fold 0
+Model 0 best validation rmse = 0.177884 on epoch 9
+Model 0 test rmse = 0.297772
+Ensemble test rmse = 0.174173
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.174173
+Overall test rmse = 0.174173 +/- 0.000000
+Elapsed time = 0:28:01
+Fold 0
+Model 0 best validation auc = 0.887550 on epoch 7
+Model 0 test auc = 0.883642
+Ensemble test auc = 0.883642
+1-fold cross validation
+	Seed 42 ==> test auc = 0.883642
+Overall test auc = 0.883642 +/- 0.000000
+Elapsed time = 0:29:03
+Fold 0
+Model 0 best validation rmse = 0.168636 on epoch 7
+Model 0 test rmse = 0.331795
+Ensemble test rmse = 0.184110
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.184110
+Overall test rmse = 0.184110 +/- 0.000000
+Elapsed time = 0:28:29
+Fold 0
+Model 0 best validation auc = 0.862034 on epoch 7
+Model 0 test auc = 0.889564
+Ensemble test auc = 0.889564
+1-fold cross validation
+	Seed 42 ==> test auc = 0.889564
+Overall test auc = 0.889564 +/- 0.000000
+Elapsed time = 0:27:00
+Fold 0
+Model 0 best validation rmse = 0.186599 on epoch 7
+Model 0 test rmse = 0.285930
+Ensemble test rmse = 0.175997
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.175997
+Overall test rmse = 0.175997 +/- 0.000000
+Elapsed time = 0:27:35
+Fold 0
+Model 0 best validation auc = 0.881281 on epoch 9
+Model 0 test auc = 0.876926
+Ensemble test auc = 0.876926
+1-fold cross validation
+	Seed 42 ==> test auc = 0.876926
+Overall test auc = 0.876926 +/- 0.000000
+Elapsed time = 0:33:32
+Fold 0
+Model 0 best validation rmse = 0.122807 on epoch 7
+Model 0 test rmse = 0.330256
+Ensemble test rmse = 0.185883
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.185883
+Overall test rmse = 0.185883 +/- 0.000000
+Elapsed time = 0:31:33
+Fold 0
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Warning: Found a task with targets all 0s or all 1s
+Model 0 best validation auc = -inf on epoch 0
+Model 0 test auc = 0.610825
+Ensemble test auc = 0.610825
+1-fold cross validation
+	Seed 42 ==> test auc = 0.610825
+Overall test auc = 0.610825 +/- 0.000000
+Elapsed time = 0:29:28
