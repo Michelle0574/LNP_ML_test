@@ -167,3 +167,93 @@ Ensemble test auc = 0.610825
 	Seed 42 ==> test auc = 0.610825
 Overall test auc = 0.610825 +/- 0.000000
 Elapsed time = 0:29:28
+Fold 0
+Model 0 best validation rmse = 0.183474 on epoch 2
+Model 0 test rmse = 0.319956
+Ensemble test rmse = 0.165902
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.165902
+Overall test rmse = 0.165902 +/- 0.000000
+Elapsed time = 0:57:40
+Fold 0
+Model 0 best validation auc = 0.916016 on epoch 1
+Model 0 test auc = 0.806733
+Ensemble test auc = 0.806733
+1-fold cross validation
+	Seed 42 ==> test auc = 0.806733
+Overall test auc = 0.806733 +/- 0.000000
+Elapsed time = 0:54:48
+Fold 0
+Model 0 best validation rmse = 0.145260 on epoch 8
+Model 0 test rmse = 0.345901
+Ensemble test rmse = 0.197252
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.197252
+Overall test rmse = 0.197252 +/- 0.000000
+Elapsed time = 0:57:16
+Fold 0
+Model 0 best validation auc = 0.875457 on epoch 9
+Model 0 test auc = 0.892907
+Ensemble test auc = 0.892907
+1-fold cross validation
+	Seed 42 ==> test auc = 0.892907
+Overall test auc = 0.892907 +/- 0.000000
+Elapsed time = 1:03:11
+Fold 0
+Model 0 best validation rmse = 0.159010 on epoch 9
+Model 0 test rmse = 0.290371
+Ensemble test rmse = 0.136716
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.136716
+Overall test rmse = 0.136716 +/- 0.000000
+Elapsed time = 1:00:23
+Fold 0
+Model 0 best validation auc = 0.899215 on epoch 9
+Model 0 test auc = 0.865197
+Ensemble test auc = 0.865197
+1-fold cross validation
+	Seed 42 ==> test auc = 0.865197
+Overall test auc = 0.865197 +/- 0.000000
+Elapsed time = 0:56:39
+Fold 0
+Model 0 best validation rmse = 0.191699 on epoch 2
+Model 0 test rmse = 0.295982
+Ensemble test rmse = 0.180594
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.180594
+Overall test rmse = 0.180594 +/- 0.000000
+Elapsed time = 0:44:36
+Fold 0
+Model 0 best validation auc = 0.841656 on epoch 8
+Model 0 test auc = 0.920552
+Ensemble test auc = 0.920552
+1-fold cross validation
+	Seed 42 ==> test auc = 0.920552
+Overall test auc = 0.920552 +/- 0.000000
+Elapsed time = 0:47:51
+Fold 0
+Model 0 best validation rmse = 0.160598 on epoch 5
+Model 0 test rmse = 0.305529
+Ensemble test rmse = 0.194597
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.194597
+Overall test rmse = 0.194597 +/- 0.000000
+Elapsed time = 0:59:44
+Fold 0
+Model 0 best validation auc = 0.880364 on epoch 8
+Model 0 test auc = 0.841381
+Ensemble test auc = 0.841381
+1-fold cross validation
+	Seed 42 ==> test auc = 0.841381
+Overall test auc = 0.841381 +/- 0.000000
+Elapsed time = 1:01:49
+Fold 0
+Fold 0
+Model 0 best validation rmse = 0.185529 on epoch 2
+Model 0 test rmse = 0.320637
+Ensemble test rmse = 0.165728
+1-fold cross validation
+	Seed 42 ==> test rmse = 0.165728
+Overall test rmse = 0.165728 +/- 0.000000
+Elapsed time = 0:27:51
+Fold 0

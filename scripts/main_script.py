@@ -14,7 +14,16 @@ import json
 import sys
 import random
 import chemprop
+from smiles_features import build_npz_from_smiles
 from pandas.api.types import is_object_dtype
+from train_multitask import train_multitask_model, get_base_args, train_hyperparam_optimized_model
+from predict_multitask_from_json import predict_multitask_from_json, get_base_predict_args, predict_multitask_from_json_cv
+from attention_fusion import train_cv as train_attn_cv, predict_cv as predict_attn_cv
+from tqdm import tqdm
+# path helpers
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+def _p(*parts):
+	return os.path.join(ROOT_DIR, *parts)
 
 def _filter_invalid_smiles(df):
 	if 'smiles' not in df.columns:
@@ -25,6 +34,21 @@ def _filter_invalid_smiles(df):
 	if bad:
 		print(f"[split] drop invalid SMILES: {bad}")
 	return df.loc[ok].reset_index(drop=True)
+
+def _normalize_metadata_missing(all_df, col_type_map, fill_numeric_with_zero=True):
+	import numpy as np
+	from pandas.api.types import is_numeric_dtype
+	missing_tokens = {'', 'na', 'NA', 'Na', 'N/A', 'none', 'None'}
+
+	meta_cols = [c for c, (t, _) in col_type_map.items() if t == 'Metadata' and c in all_df.columns]
+	for c in meta_cols:
+		v_num = pd.to_numeric(all_df[c], errors='coerce')
+		if v_num.notna().any():
+			all_df[c] = v_num.fillna(0.0) if fill_numeric_with_zero else v_num
+		else:
+			s = all_df[c].astype(str).str.strip()
+			all_df.loc[s.isin(missing_tokens), c] = np.nan
+	return all_df
 
 def merge_datasets(experiment_list, path_to_folders = '../data/data_files_to_merge', write_path = '../data'):
 	all_df = pd.DataFrame({})
@@ -100,7 +124,7 @@ def merge_datasets(experiment_list, path_to_folders = '../data/data_files_to_mer
 			formulation_temp['Phospholipid_Mol_Ratio']   = phos_mol_fracs
 			formulation_temp['Cholesterol_Mol_Ratio']    = chol_mol_fracs
 			formulation_temp['PEG_Lipid_Mol_Ratio']      = peg_lip_mol_fracs
-
+			
 			if len(individual_temp) != data_n:
 				raise ValueError(f'For experiment {folder}: individual_metadata rows {len(individual_temp)} != main_data rows {data_n}')
 
@@ -158,6 +182,14 @@ def merge_datasets(experiment_list, path_to_folders = '../data/data_files_to_mer
 				col_type_map[name] = ('Metadata','')
 	except Exception as e:
 		print('Warning: roles file not applied:', e)
+
+	all_df = _normalize_metadata_missing(all_df, col_type_map, fill_numeric_with_zero=True)
+
+	_missing_tokens = {'', 'na', 'NA', 'Na', 'N/A', 'none', 'None'}
+	for c in all_df.columns:
+		if all_df[c].dtype == object:
+			s = all_df[c].astype(str).str.strip()
+			all_df.loc[s.isin(_missing_tokens), c] = np.nan
 
 	# One-hot for selected categorical X
 	extra_x_variables = ['Cationic_Lipid_Mol_Ratio','Phospholipid_Mol_Ratio','Cholesterol_Mol_Ratio','PEG_Lipid_Mol_Ratio','Cationic_Lipid_to_mRNA_weight_ratio']
@@ -227,14 +259,14 @@ def merge_datasets(experiment_list, path_to_folders = '../data/data_files_to_mer
 		if len(dt_oh) > 0:
 			all_df['Delivery_target'] = all_df[dt_oh].idxmax(axis=1).str.replace('Delivery_target_', '', n=1)
 		else:
-			all_df['Delivery_target'] = 'NA'
+			all_df['Delivery_target'] = np.nan
 
 	for col in ['quantified_total_luminescence', 'quantified_delivery']:
 		if col in all_df.columns:
 			all_df[col] = pd.to_numeric(all_df[col], errors='coerce')
 
 	all_df = all_df.replace({True:1.0, False:0.0})
-	all_df.to_csv(write_path + '/all_data.csv', index=False)
+	all_df.to_csv(write_path + '/all_data.csv', index=False, na_rep='NaN')
 	col_type_df.to_csv(write_path + '/col_type.csv', index=False)
 	print('Merged to:', write_path + '/all_data.csv')
 	print('Column roles to:', write_path + '/col_type.csv')
@@ -362,7 +394,7 @@ def split_for_cv(vals,cv_fold, held_out_fraction):
 	return [cv_vals[i::cv_fold] for i in range(cv_fold)],held_out_vals
 
 def nested_split_for_cv(vals,cv_fold):
-	# Returns nested_cv_vals: nested_cv_vals[i] has 
+    # Returns nested_cv_vals: nested_cv_vals[i] has 
 	random.shuffle(vals)
 	initial_split = split_for_cv_for_nested(vals, cv_fold)
 	nested_cv_vals = [([],initial_split[i]) for i in range(cv_fold)]
@@ -932,9 +964,6 @@ def make_pred_vs_actual(split_folder, ensemble_size = 5, predictions_done = [], 
 		output.to_csv(results_dir+'/predicted_vs_actual.csv',index = False)
 
 
-
-
-
 def ensemble_predict_cv(path_to_folders = '../data/crossval_splits', ensemble_size = 5, predictions_done = [], path_to_new_test = '',standardize_predictions = True):
 	# Makes predictions on a new test set path_to_new_test (i.e. perform a screen on data stored in /in_silico_screen_results)
 	# with ensemble model from cross-validation
@@ -1079,29 +1108,29 @@ def generate_normalized_data(all_df, split_variables=None):
 
 
 def is_pareto_efficient(costs, return_mask = True):
-	"""
-	Find the pareto-efficient points
-	:param costs: An (n_points, n_costs) array
-	:param return_mask: True to return a mask
-	:return: An array of indices of pareto-efficient points.
-		If return_mask is True, this will be an (n_points, ) boolean array
-		Otherwise it will be a (n_efficient_points, ) integer array of indices.
-	"""
-	is_efficient = np.arange(costs.shape[0])
-	n_points = costs.shape[0]
-	next_point_index = 0  # Next index in the is_efficient array to search for
-	while next_point_index<len(costs):
-		nondominated_point_mask = np.any(costs>costs[next_point_index], axis=1)
-		nondominated_point_mask[next_point_index] = True
-		is_efficient = is_efficient[nondominated_point_mask]  # Remove dominated points
-		costs = costs[nondominated_point_mask]
-		next_point_index = np.sum(nondominated_point_mask[:next_point_index])+1
-	if return_mask:
-		is_efficient_mask = np.zeros(n_points, dtype = bool)
-		is_efficient_mask[is_efficient] = True
-		return is_efficient_mask
-	else:
-		return is_efficient
+    """
+    Find the pareto-efficient points
+    :param costs: An (n_points, n_costs) array
+    :param return_mask: True to return a mask
+    :return: An array of indices of pareto-efficient points.
+        If return_mask is True, this will be an (n_points, ) boolean array
+        Otherwise it will be a (n_efficient_points, ) integer array of indices.
+    """
+    is_efficient = np.arange(costs.shape[0])
+    n_points = costs.shape[0]
+    next_point_index = 0  # Next index in the is_efficient array to search for
+    while next_point_index<len(costs):
+        nondominated_point_mask = np.any(costs>costs[next_point_index], axis=1)
+        nondominated_point_mask[next_point_index] = True
+        is_efficient = is_efficient[nondominated_point_mask]  # Remove dominated points
+        costs = costs[nondominated_point_mask]
+        next_point_index = np.sum(nondominated_point_mask[:next_point_index])+1
+    if return_mask:
+        is_efficient_mask = np.zeros(n_points, dtype = bool)
+        is_efficient_mask[is_efficient] = True
+        return is_efficient_mask
+    else:
+        return is_efficient
 
 def analyze_predictions(split_name,pred_split_variables = ['Experiment_ID','Library_ID','Delivery_target','Route_of_administration'], path_to_preds = 'Data/Multitask_data/All_datasets'):
 	preds_vs_actual = pd.read_csv(path_to_preds + '/Splits/'+split_name+'/Predicted_vs_actual.csv')
@@ -1615,6 +1644,23 @@ def _preflight_check(split_folder, cv_num=5):
 				print(f"[check][cv{cv}] classification:", issues_c)
 	return all_ok
 
+def _collect_unique_smiles_from_all_data(path='../data/all_data.csv'):
+	df = pd.read_csv(path, usecols=['smiles'])
+	s = df['smiles'].dropna().astype(str).str.strip()
+	return sorted(list(set(s[s != ''].tolist())))
+
+def _collect_unique_smiles_from_split(split_folder, cv_num=5):
+	smiles = []
+	for cv in range(cv_num):
+		base = '../data/crossval_splits/' + split_folder + '/cv_' + str(cv)
+		for fname in ['train.csv','valid.csv','test.csv']:
+			p = os.path.join(base, fname)
+			if os.path.exists(p):
+				df = pd.read_csv(p, usecols=['smiles'])
+				s = df['smiles'].dropna().astype(str).str.strip()
+				smiles += s[s!=''].tolist()
+	return sorted(list(set(smiles)))
+
 def main(argv):
 	# minimal arg check
 	if len(argv) < 2:
@@ -1651,21 +1697,20 @@ def main(argv):
 
 		# replace the for-cv training loop inside `if task_type == 'train':`
 		for cv in range(cv_num):
-			split_dir = '../data/crossval_splits/' + split_folder + '/cv_' + str(cv)
-
+			data_dir_base = _p('data', 'crossval_splits', split_folder, f'cv_{cv}')
 			# ensure weights files are valid for all sets
-			_ensure_weights(split_dir, 'train')
-			_ensure_weights(split_dir, 'valid')
-			_ensure_weights(split_dir, 'test')
+			_ensure_weights(data_dir_base, 'train')
+			_ensure_weights(data_dir_base, 'valid')
+			_ensure_weights(data_dir_base, 'test')
 
 			# ---- Regression head ----
-			y_tr_path = os.path.join(split_dir, 'train.csv')
+			y_tr_path = os.path.join(data_dir_base, 'train.csv')
 			if not os.path.exists(y_tr_path):
 				print(f"[train][cv{cv}] train.csv not found, skip regression.")
 			else:
 				reg_header = pd.read_csv(y_tr_path, nrows=0).columns.tolist()
 
-				roles_path = '../data/args_files/target_roles.json'
+				roles_path = _p('data','args_files','target_roles.json')
 				try:
 					roles = json.load(open(roles_path, 'r', encoding='utf-8'))
 					role_reg = roles.get('regression_targets', [])
@@ -1676,22 +1721,23 @@ def main(argv):
 				has_reg_targets = len(reg_targets) > 0
 
 				if has_reg_targets:
+					save_dir_reg = data_dir_base
+					os.makedirs(save_dir_reg, exist_ok=True)
 					arguments = [
 						'--epochs', str(epochs),
-						'--save_dir', split_dir,
+						'--save_dir', save_dir_reg,
 						'--seed', '42',
 						'--dataset_type', 'regression',
-						'--data_path', os.path.join(split_dir, 'train.csv'),
-						'--features_path', os.path.join(split_dir, 'train_extra_x.csv'),
-						'--separate_val_path', os.path.join(split_dir, 'valid.csv'),
-						'--separate_val_features_path', os.path.join(split_dir, 'valid_extra_x.csv'),
-						'--separate_test_path', os.path.join(split_dir, 'test.csv'),
-						'--separate_test_features_path', os.path.join(split_dir, 'test_extra_x.csv'),
-						'--config_path', '../data/args_files/optimized_configs.json',
+						'--data_path', os.path.join(data_dir_base, 'train.csv'),
+						'--separate_val_path', os.path.join(data_dir_base, 'valid.csv'),
+						'--separate_test_path', os.path.join(data_dir_base, 'test.csv'),
+						'--features_path', os.path.join(data_dir_base, 'train_extra_x.csv'),
+						'--separate_val_features_path', os.path.join(data_dir_base, 'valid_extra_x.csv'),
+						'--separate_test_features_path', os.path.join(data_dir_base, 'test_extra_x.csv'),
+						'--config_path', _p('data','args_files','optimized_configs.json'),
 						'--loss_function', 'mse', '--metric', 'rmse'
 					]
 					arguments += ['--target_columns'] + reg_targets
-					# arguments = _add_repeat_flags(arguments, '--task_names', reg_targets)
 					if 'morgan' in split_folder:
 						arguments += ['--features_generator', 'morgan_count']
 					args = chemprop.args.TrainArgs().parse_args(arguments)
@@ -1700,31 +1746,30 @@ def main(argv):
 					print(f"[train][cv{cv}] no regression targets, skip.")
 
 			# ---- Classification head ----
-			clf_train_path = os.path.join(split_dir, 'train_clf.csv')
+			clf_train_path = os.path.join(data_dir_base, 'train_clf.csv')
 			if os.path.exists(clf_train_path):
 				clf_header = pd.read_csv(clf_train_path, nrows=0).columns.tolist()
 				clf_targets = [c for c in clf_header if c.lower() != 'smiles']
 				has_clf_targets = len(clf_targets) > 0
 
 				if has_clf_targets:
-					save_dir_clf = split_dir + '_clf'
+					save_dir_clf = _p('data', 'crossval_splits', split_folder, f'cv_{cv}_clf')
 					os.makedirs(save_dir_clf, exist_ok=True)
 					arguments = [
 						'--epochs', str(epochs),
 						'--save_dir', save_dir_clf,
 						'--seed', '42',
 						'--dataset_type', 'classification',
-						'--data_path', os.path.join(split_dir, 'train_clf.csv'),
-						'--features_path', os.path.join(split_dir, 'train_extra_x.csv'),
-						'--separate_val_path', os.path.join(split_dir, 'valid_clf.csv'),
-						'--separate_val_features_path', os.path.join(split_dir, 'valid_extra_x.csv'),
-						'--separate_test_path', os.path.join(split_dir, 'test_clf.csv'),
-						'--separate_test_features_path', os.path.join(split_dir, 'test_extra_x.csv'),
-						'--config_path', '../data/args_files/optimized_configs.json',
+						'--data_path', os.path.join(data_dir_base, 'train_clf.csv'),
+						'--separate_val_path', os.path.join(data_dir_base, 'valid_clf.csv'),
+						'--separate_test_path', os.path.join(data_dir_base, 'test_clf.csv'),
+						'--features_path', os.path.join(data_dir_base, 'train_extra_x.csv'),
+						'--separate_val_features_path', os.path.join(data_dir_base, 'valid_extra_x.csv'),
+						'--separate_test_features_path', os.path.join(data_dir_base, 'test_extra_x.csv'),
+						'--config_path', _p('data','args_files','optimized_configs.json'),
 						'--loss_function', 'binary_cross_entropy', '--metric', 'auc'
 					]
 					arguments += ['--target_columns'] + clf_targets
-					# arguments = _add_repeat_flags(arguments, '--task_names', clf_targets)
 					if 'morgan' in split_folder:
 						arguments += ['--features_generator', 'morgan_count']
 					args = chemprop.args.TrainArgs().parse_args(arguments)
@@ -1739,15 +1784,16 @@ def main(argv):
 		if len(argv) < 4:
 			raise ValueError("predict requires: split_folder screen_name")
 		cv_num = 5
-		split_model_folder = '../data/crossval_splits/' + argv[2]
+		split_folder = argv[2]
+		split_model_folder = _p('data', 'crossval_splits', split_folder)
 		screen_name = argv[3]
 
-		lib_dir = '../data/libraries/' + screen_name
+		lib_dir = _p('data', 'libraries', screen_name)
 		test_path = os.path.join(lib_dir, screen_name + '.csv')
 		test_feat_path = os.path.join(lib_dir, screen_name + '_extra_x.csv')
 		meta_path = os.path.join(lib_dir, screen_name + '_metadata.csv')
 
-		out_dir = '../results/screen_results/' + argv[2] + '_preds/' + screen_name
+		out_dir = _p('results', 'screen_results', split_folder + '_preds', screen_name)
 		os.makedirs(out_dir, exist_ok=True)
 
 		# start result df with metadata if exists, else from predictions later
@@ -1761,26 +1807,26 @@ def main(argv):
 			reg_preds_path = os.path.join(out_dir, f'cv_{cv}_preds_reg.csv')
 			if os.path.isdir(reg_ckpt):
 				arguments = [
-						'--test_path', test_path,
-						'--features_path', test_feat_path,
-						'--checkpoint_dir', reg_ckpt,
-						'--preds_path', reg_preds_path
+					'--test_path', test_path,
+					'--features_path', test_feat_path,
+					'--checkpoint_dir', reg_ckpt,
+					'--preds_path', reg_preds_path
 				]
-			if 'morgan' in split_model_folder:
+				if 'morgan' in split_folder:
 					arguments += ['--features_generator', 'morgan_count']
-			args = chemprop.args.PredictArgs().parse_args(arguments)
-			chemprop.train.make_predictions(args=args)
+				args = chemprop.args.PredictArgs().parse_args(arguments)
+				chemprop.train.make_predictions(args=args)
 
-			reg_df = pd.read_csv(reg_preds_path)
-			if all_df is None:
-				all_df = pd.DataFrame({})
-			all_df['smiles'] = reg_df['smiles']
-			for col in reg_df.columns:
-				if col.lower() == 'smiles': continue
-				all_df[f'cv_{cv}_pred_{col}'] = reg_df[col]
-				reg_cols_union.add(col)
-		else:
-			print(f"[predict][cv{cv}] regression checkpoint not found, skip.")
+				reg_df = pd.read_csv(reg_preds_path)
+				if all_df is None:
+					all_df = pd.DataFrame({})
+				all_df['smiles'] = reg_df['smiles']
+				for col in reg_df.columns:
+					if col.lower() == 'smiles': continue
+					all_df[f'cv_{cv}_pred_{col}'] = reg_df[col]
+					reg_cols_union.add(col)
+			else:
+				print(f"[predict][cv{cv}] regression checkpoint not found, skip.")
 
 			# ---- Classification predictions ----
 			clf_ckpt = os.path.join(split_model_folder, 'cv_' + str(cv) + '_clf')
@@ -1792,7 +1838,7 @@ def main(argv):
 					'--checkpoint_dir', clf_ckpt,
 					'--preds_path', clf_preds_path
 				]
-				if 'morgan' in split_model_folder:
+				if 'morgan' in split_folder:
 					arguments += ['--features_generator', 'morgan_count']
 				args = chemprop.args.PredictArgs().parse_args(arguments)
 				chemprop.train.make_predictions(args=args)
@@ -1870,9 +1916,40 @@ def main(argv):
 		make_pred_vs_actual(split, predictions_done=[], ensemble_size=5)
 		analyze_predictions_cv(split)
 
-	elif task_type == 'merge_datasets':
-		# Build all_data.csv and col_type.csv with roles
-		merge_datasets(None)
+	elif task_type == 'train_attention':
+		if len(argv) < 3:
+			raise ValueError("train_attention requires: split_folder [--epochs E] [--device cpu|cuda] [--config path]")
+		split_folder = argv[2]
+		epochs = 20; device = 'cpu'; cfg_path = _p('data','args_files','attention_config.json')
+		for i, arg in enumerate(argv):
+			if arg.replace('–','-') == '--epochs' and i+1 < len(argv):
+				epochs = int(argv[i+1])
+			if arg.replace('–','-') == '--device' and i+1 < len(argv):
+				device = argv[i+1]
+				if device.lower() == 'gpu': device = 'cuda'
+			if arg.replace('–','-') == '--config' and i+1 < len(argv):
+				cfg_path = argv[i+1]
+		npz_path = _p('data', 'smiles_features.npz')
+		for cv in tqdm(range(5), desc=f"Train attention | {split_folder}", leave=True):
+			train_attn_cv(split_folder, cv_index=cv, npz_path=npz_path, epochs=epochs, d_model=128, device=device)
+			out_csv = _p('results', 'crossval_splits', split_folder, f'cv_{cv}_attn', 'predicted_vs_actual.csv')
+			os.makedirs(os.path.dirname(out_csv), exist_ok=True)
+			predict_attn_cv(split_folder, cv_index=cv, npz_path=npz_path, out_csv=out_csv, device=device)
+
+	elif task_type == 'predict_attention':
+		if len(argv) < 3:
+			raise ValueError("predict_attention requires: split_folder [--config path]")
+		split_folder = argv[2]
+		cfg_path = _p('data','args_files','attention_config.json')
+		for i, arg in enumerate(argv):
+			if arg.replace('–','-') == '--config' and i+1 < len(argv):
+				cfg_path = argv[i+1]
+		npz_path = _p('data', 'smiles_features.npz')
+		for cv in range(5):
+			out_csv = _p('results', 'crossval_splits', split_folder, f'cv_{cv}_attn', 'predicted_vs_actual.csv')
+			os.makedirs(os.path.dirname(out_csv), exist_ok=True)
+			df = predict_attn_cv(split_folder, cv_index=cv, npz_path=npz_path, out_csv=out_csv, device='cpu')
+			print(f"[predict_attention][cv{cv}] wrote: {out_csv}")
 
 	elif task_type == 'split':
 		# Create CV splits (will also write *_clf files if roles specify classification)
@@ -1890,6 +1967,20 @@ def main(argv):
 			elif argv[4] == 'in_silico_screen_split':
 				in_silico_screen = True
 		specified_cv_split(split_spec, ultra_held_out_fraction=ultra_held_out, is_morgan=is_morgan, test_is_valid=in_silico_screen)
+
+	elif task_type == 'build_smiles_features':
+		# Usage:
+		#   python scripts/main_script.py build_smiles_features all_data
+		#   python scripts/main_script.py build_smiles_features split <split_folder>
+		out_path = '../data/smiles_features.npz'
+		if len(argv) >= 3 and argv[2] == 'all_data':
+			smiles = _collect_unique_smiles_from_all_data('../data/all_data.csv')
+		elif len(argv) >= 4 and argv[2] == 'split':
+			smiles = _collect_unique_smiles_from_split(argv[3])
+		else:
+			raise ValueError("build_smiles_features requires: all_data  OR  split <split_folder>")
+		print(f"[build_smiles_features] unique SMILES: {len(smiles)}")
+		build_npz_from_smiles(smiles, out_path, nbits=1024, radius=2)
 
 	else:
 		print(f"Unknown task: {task_type}")

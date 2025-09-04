@@ -119,8 +119,8 @@
         "command_line": "python main_script.py train all_amine_split_for_paper --epochs 10",
         "git_has_uncommitted_changes": true,
         "git_root": "C:/Users/86151/Documents/GitHub/LNP_ML_test2",
-        "git_url": "https://github.com/Michelle0574/LNP_ML_test/tree/661d7d5fc8f29d51a67c6f48d59014eb2436b32f",
-        "time": "Wed Aug 27 20:23:18 2025"
+        "git_url": "https://github.com/Michelle0574/LNP_ML_test/tree/d76605e71dcc8b5109f1deb0780bf5799e4b8f88",
+        "time": "Wed Sep  3 01:03:52 2025"
     },
     "resume_experiment": false,
     "save_dir": "../data/crossval_splits/all_amine_split_for_paper/cv_3",

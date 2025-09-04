@@ -1,0 +1,10 @@
+{
+    "d_model": 128,
+    "nhead": 4,
+    "enc_layers": 2,
+    "cross_layers": 2,
+    "per_dim_tokens_thresh": 64,
+    "lr": 3e-5,
+    "weight_decay": 1e-4,
+    "lambda_clf": 0.05
+  }
