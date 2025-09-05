@@ -1,155 +1,44 @@
 Fold 0
-Model 0 best validation rmse = 0.988594 on epoch 14
-Model 0 test rmse = 0.888062
-Ensemble test rmse = 0.888062
+Model 0 best validation rmse = 0.168862 on epoch 6
+Model 0 test rmse = 0.302142
+Ensemble test rmse = 0.152345
 1-fold cross validation
-	Seed 42 ==> test rmse = 0.888062
-Overall test rmse = 0.888062 +/- 0.000000
-Elapsed time = 0:06:15
+	Seed 42 ==> test rmse = 0.152345
+Overall test rmse = 0.152345 +/- 0.000000
+Elapsed time = 0:01:26
 Fold 0
-Model 0 best validation rmse = 0.889198 on epoch 23
-Model 0 test rmse = 1.016737
-Ensemble test rmse = 1.016737
+Model 0 best validation auc = 0.903263 on epoch 9
+Model 0 test auc = 0.835735
+Ensemble test auc = 0.835735
 1-fold cross validation
-	Seed 42 ==> test rmse = 1.016737
-Overall test rmse = 1.016737 +/- 0.000000
-Elapsed time = 0:06:23
+	Seed 42 ==> test auc = 0.835735
+Overall test auc = 0.835735 +/- 0.000000
+Elapsed time = 0:01:18
 Fold 0
-Model 0 best validation rmse = 0.889024 on epoch 22
-Model 0 test rmse = 0.878807
-Ensemble test rmse = 0.878807
+Model 0 best validation rmse = 0.198287 on epoch 9
+Model 0 test rmse = 0.288864
+Ensemble test rmse = 0.173079
 1-fold cross validation
-	Seed 42 ==> test rmse = 0.878807
-Overall test rmse = 0.878807 +/- 0.000000
-Elapsed time = 0:06:27
+	Seed 42 ==> test rmse = 0.173079
+Overall test rmse = 0.173079 +/- 0.000000
+Elapsed time = 0:01:11
 Fold 0
-Model 0 best validation rmse = 0.879277 on epoch 17
-Model 0 test rmse = 0.924593
-Ensemble test rmse = 0.924593
+Model 0 best validation auc = 0.860318 on epoch 9
+Model 0 test auc = 0.887579
+Ensemble test auc = 0.887579
 1-fold cross validation
-	Seed 42 ==> test rmse = 0.924593
-Overall test rmse = 0.924593 +/- 0.000000
-Elapsed time = 0:06:13
+	Seed 42 ==> test auc = 0.887579
+Overall test auc = 0.887579 +/- 0.000000
+Elapsed time = 0:01:12
 Fold 0
-Model 0 best validation rmse = 0.881056 on epoch 17
-Model 0 test rmse = 0.826890
-Ensemble test rmse = 0.826890
+Model 0 best validation rmse = 0.177065 on epoch 8
+Model 0 test rmse = 0.363428
+Ensemble test rmse = 0.199959
 1-fold cross validation
-	Seed 42 ==> test rmse = 0.826890
-Overall test rmse = 0.826890 +/- 0.000000
-Elapsed time = 0:06:58
+	Seed 42 ==> test rmse = 0.199959
+Overall test rmse = 0.199959 +/- 0.000000
+Elapsed time = 0:01:15
 Fold 0
-Model 0 best validation rmse = 0.193757 on epoch 40
-Model 0 test rmse = 0.250701
-Ensemble test rmse = 0.147050
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.147050
-Overall test rmse = 0.147050 +/- 0.000000
-Elapsed time = 2:12:15
-Fold 0
-Model 0 best validation rmse = 0.812480 on epoch 2
-Model 0 test rmse = 0.334568
-Ensemble test rmse = 0.334568
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.334568
-Overall test rmse = 0.334568 +/- 0.000000
-Elapsed time = 0:20:12
-Fold 0
-Model 0 best validation rmse = 0.164627 on epoch 8
-Model 0 test rmse = 0.311840
-Ensemble test rmse = 0.184251
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.184251
-Overall test rmse = 0.184251 +/- 0.000000
-Elapsed time = 2:07:55
-Fold 0
-Fold 0
-Model 0 best validation rmse = 0.163188 on epoch 0
-Model 0 test rmse = 0.255783
-Ensemble test rmse = 0.138102
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.138102
-Overall test rmse = 0.138102 +/- 0.000000
-Elapsed time = 0:27:25
-Fold 0
-Model 0 best validation auc = 0.825582 on epoch 9
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Model 0 test auc = 0.858814
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Ensemble test auc = nan
-1-fold cross validation
-	Seed 42 ==> test auc = nan
-Overall test auc = nan +/- nan
-Elapsed time = 0:27:57
-Fold 0
-Model 0 best validation rmse = 0.177884 on epoch 9
-Model 0 test rmse = 0.297772
-Ensemble test rmse = 0.174173
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.174173
-Overall test rmse = 0.174173 +/- 0.000000
-Elapsed time = 0:28:01
-Fold 0
-Model 0 best validation auc = 0.887550 on epoch 7
-Model 0 test auc = 0.883642
-Ensemble test auc = 0.883642
-1-fold cross validation
-	Seed 42 ==> test auc = 0.883642
-Overall test auc = 0.883642 +/- 0.000000
-Elapsed time = 0:29:03
-Fold 0
-Model 0 best validation rmse = 0.168636 on epoch 7
-Model 0 test rmse = 0.331795
-Ensemble test rmse = 0.184110
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.184110
-Overall test rmse = 0.184110 +/- 0.000000
-Elapsed time = 0:28:29
-Fold 0
-Model 0 best validation auc = 0.862034 on epoch 7
-Model 0 test auc = 0.889564
-Ensemble test auc = 0.889564
-1-fold cross validation
-	Seed 42 ==> test auc = 0.889564
-Overall test auc = 0.889564 +/- 0.000000
-Elapsed time = 0:27:00
-Fold 0
-Model 0 best validation rmse = 0.186599 on epoch 7
-Model 0 test rmse = 0.285930
-Ensemble test rmse = 0.175997
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.175997
-Overall test rmse = 0.175997 +/- 0.000000
-Elapsed time = 0:27:35
-Fold 0
-Model 0 best validation auc = 0.881281 on epoch 9
-Model 0 test auc = 0.876926
-Ensemble test auc = 0.876926
-1-fold cross validation
-	Seed 42 ==> test auc = 0.876926
-Overall test auc = 0.876926 +/- 0.000000
-Elapsed time = 0:33:32
-Fold 0
-Model 0 best validation rmse = 0.122807 on epoch 7
-Model 0 test rmse = 0.330256
-Ensemble test rmse = 0.185883
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.185883
-Overall test rmse = 0.185883 +/- 0.000000
-Elapsed time = 0:31:33
-Fold 0
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
 Warning: Found a task with targets all 0s or all 1s
 Warning: Found a task with targets all 0s or all 1s
 Warning: Found a task with targets all 0s or all 1s
@@ -161,99 +50,43 @@ Warning: Found a task with targets all 0s or all 1s
 Warning: Found a task with targets all 0s or all 1s
 Warning: Found a task with targets all 0s or all 1s
 Model 0 best validation auc = -inf on epoch 0
-Model 0 test auc = 0.610825
-Ensemble test auc = 0.610825
+Model 0 test auc = 0.549145
+Ensemble test auc = 0.549145
 1-fold cross validation
-	Seed 42 ==> test auc = 0.610825
-Overall test auc = 0.610825 +/- 0.000000
-Elapsed time = 0:29:28
+	Seed 42 ==> test auc = 0.549145
+Overall test auc = 0.549145 +/- 0.000000
+Elapsed time = 0:01:16
 Fold 0
-Model 0 best validation rmse = 0.183474 on epoch 2
-Model 0 test rmse = 0.319956
-Ensemble test rmse = 0.165902
+Model 0 best validation rmse = 0.132296 on epoch 9
+Model 0 test rmse = 0.333650
+Ensemble test rmse = 0.193032
 1-fold cross validation
-	Seed 42 ==> test rmse = 0.165902
-Overall test rmse = 0.165902 +/- 0.000000
-Elapsed time = 0:57:40
+	Seed 42 ==> test rmse = 0.193032
+Overall test rmse = 0.193032 +/- 0.000000
+Elapsed time = 0:01:15
 Fold 0
-Model 0 best validation auc = 0.916016 on epoch 1
-Model 0 test auc = 0.806733
-Ensemble test auc = 0.806733
+Model 0 best validation auc = 0.883312 on epoch 5
+Warning: Found a task with targets all 0s or all 1s
+Model 0 test auc = 0.896446
+Warning: Found a task with targets all 0s or all 1s
+Ensemble test auc = nan
 1-fold cross validation
-	Seed 42 ==> test auc = 0.806733
-Overall test auc = 0.806733 +/- 0.000000
-Elapsed time = 0:54:48
+	Seed 42 ==> test auc = nan
+Overall test auc = nan +/- nan
+Elapsed time = 0:01:16
 Fold 0
-Model 0 best validation rmse = 0.145260 on epoch 8
-Model 0 test rmse = 0.345901
-Ensemble test rmse = 0.197252
+Model 0 best validation rmse = 0.175435 on epoch 9
+Model 0 test rmse = 0.271831
+Ensemble test rmse = 0.144726
 1-fold cross validation
-	Seed 42 ==> test rmse = 0.197252
-Overall test rmse = 0.197252 +/- 0.000000
-Elapsed time = 0:57:16
+	Seed 42 ==> test rmse = 0.144726
+Overall test rmse = 0.144726 +/- 0.000000
+Elapsed time = 0:01:16
 Fold 0
-Model 0 best validation auc = 0.875457 on epoch 9
-Model 0 test auc = 0.892907
-Ensemble test auc = 0.892907
+Model 0 best validation auc = 0.834069 on epoch 3
+Model 0 test auc = 0.835755
+Ensemble test auc = 0.835755
 1-fold cross validation
-	Seed 42 ==> test auc = 0.892907
-Overall test auc = 0.892907 +/- 0.000000
-Elapsed time = 1:03:11
-Fold 0
-Model 0 best validation rmse = 0.159010 on epoch 9
-Model 0 test rmse = 0.290371
-Ensemble test rmse = 0.136716
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.136716
-Overall test rmse = 0.136716 +/- 0.000000
-Elapsed time = 1:00:23
-Fold 0
-Model 0 best validation auc = 0.899215 on epoch 9
-Model 0 test auc = 0.865197
-Ensemble test auc = 0.865197
-1-fold cross validation
-	Seed 42 ==> test auc = 0.865197
-Overall test auc = 0.865197 +/- 0.000000
-Elapsed time = 0:56:39
-Fold 0
-Model 0 best validation rmse = 0.191699 on epoch 2
-Model 0 test rmse = 0.295982
-Ensemble test rmse = 0.180594
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.180594
-Overall test rmse = 0.180594 +/- 0.000000
-Elapsed time = 0:44:36
-Fold 0
-Model 0 best validation auc = 0.841656 on epoch 8
-Model 0 test auc = 0.920552
-Ensemble test auc = 0.920552
-1-fold cross validation
-	Seed 42 ==> test auc = 0.920552
-Overall test auc = 0.920552 +/- 0.000000
-Elapsed time = 0:47:51
-Fold 0
-Model 0 best validation rmse = 0.160598 on epoch 5
-Model 0 test rmse = 0.305529
-Ensemble test rmse = 0.194597
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.194597
-Overall test rmse = 0.194597 +/- 0.000000
-Elapsed time = 0:59:44
-Fold 0
-Model 0 best validation auc = 0.880364 on epoch 8
-Model 0 test auc = 0.841381
-Ensemble test auc = 0.841381
-1-fold cross validation
-	Seed 42 ==> test auc = 0.841381
-Overall test auc = 0.841381 +/- 0.000000
-Elapsed time = 1:01:49
-Fold 0
-Fold 0
-Model 0 best validation rmse = 0.185529 on epoch 2
-Model 0 test rmse = 0.320637
-Ensemble test rmse = 0.165728
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.165728
-Overall test rmse = 0.165728 +/- 0.000000
-Elapsed time = 0:27:51
-Fold 0
+	Seed 42 ==> test auc = 0.835755
+Overall test auc = 0.835755 +/- 0.000000
+Elapsed time = 0:01:17

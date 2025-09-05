@@ -22,6 +22,7 @@ from tqdm import tqdm
 from rdkit import Chem
 from rdkit.Chem import AllChem, MACCSkeys
 from smiles_features import load_smiles_features_npz, _calc_one
+from sklearn.metrics import roc_auc_score, average_precision_score
 
 def _device_of(t: torch.Tensor) -> torch.device:
 	return t.device if isinstance(t, torch.Tensor) else torch.device('cpu')
@@ -83,22 +84,23 @@ class SmilesVectorizer(nn.Module):
 		Return tokens [3, d_model] for a single SMILES.
 		If SMILES missing in cache, compute on-the-fly with RDKit. If invalid, zeros.
 		"""
+		device = self.desc_mean.device
 		if smiles in self.sm2feat:
 			f = self.sm2feat[smiles]
-			desc = torch.from_numpy(f['desc'].astype(np.float32))
-			morgan = torch.from_numpy(f['morgan'].astype(np.float32))
-			maccs = torch.from_numpy(f['maccs'].astype(np.float32))
+			desc = torch.from_numpy(f['desc'].astype(np.float32)).to(device)
+			morgan = torch.from_numpy(f['morgan'].astype(np.float32)).to(device)
+			maccs = torch.from_numpy(f['maccs'].astype(np.float32)).to(device)
 		else:
 			res = _calc_one(smiles)
 			if res is None:
-				desc = torch.zeros_like(self.desc_mean)
-				morgan = torch.zeros(1024, dtype=torch.float32)
-				maccs  = torch.zeros(167,  dtype=torch.float32)
+				desc = torch.zeros_like(self.desc_mean, device=device)
+				morgan = torch.zeros(1024, dtype=torch.float32, device=device)
+				maccs  = torch.zeros(167,  dtype=torch.float32, device=device)
 			else:
 				d, mg, mc = res
-				desc = torch.from_numpy(d.astype(np.float32))
-				morgan = torch.from_numpy(mg.astype(np.float32))
-				maccs  = torch.from_numpy(mc.astype(np.float32))
+				desc = torch.from_numpy(d.astype(np.float32)).to(device)
+				morgan = torch.from_numpy(mg.astype(np.float32)).to(device)
+				maccs  = torch.from_numpy(mc.astype(np.float32)).to(device)
 
 		# sanitize then standardize
 		desc = torch.nan_to_num(desc, nan=0.0, posinf=1e6, neginf=-1e6)
@@ -126,6 +128,27 @@ class PositionalEncoding(nn.Module):
 	def forward(self, x: torch.Tensor) -> torch.Tensor:
 		return x + self.pe[:, :x.size(1), :]
 
+class SelfAttnBlock(nn.Module):
+	def __init__(self, d_model: int = 128, nhead: int = 4):
+		super().__init__()
+		self.attn = nn.MultiheadAttention(d_model, nhead, batch_first=True)
+		self.ff = nn.Sequential(
+			nn.Linear(d_model, 4*d_model),
+			nn.ReLU(),
+			nn.Linear(4*d_model, d_model)
+		)
+		self.ln1 = nn.LayerNorm(d_model)
+		self.ln2 = nn.LayerNorm(d_model)
+		self.last_attn = None  # [B, H, T, T]
+
+	def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+		a, w = self.attn(x, x, x, need_weights=True, average_attn_weights=False)
+		self.last_attn = w.detach()
+		h = self.ln1(x + a)
+		h2 = self.ff(h)
+		h = self.ln2(h + h2)
+		return h, self.last_attn
+	
 class GroupEncoder(nn.Module):
 	"""
 	Generic per-group self-attention encoder.
@@ -136,28 +159,38 @@ class GroupEncoder(nn.Module):
 	"""
 	def __init__(self, in_dim: int, d_model: int = 128, nhead: int = 4, nlayers: int = 1, tokens_mode: str = 'vector'):
 		super().__init__()
-		self.tokens_mode = tokens_mode  # 'vector' or 'per_dim'
+		self.tokens_mode = tokens_mode
+		self.last_attn = None
 		if tokens_mode == 'vector':
 			self.proj = nn.Linear(in_dim, d_model)
 			self.tok_T = 1
+			self.blocks = None
 		else:
 			self.proj = nn.Linear(1, d_model)
 			self.tok_T = in_dim
+			self.blocks = nn.ModuleList([SelfAttnBlock(d_model, nhead) for _ in range(nlayers)])
 
-		enc_layer = nn.TransformerEncoderLayer(d_model=d_model, nhead=nhead, dim_feedforward=4*d_model, batch_first=True)
-		self.encoder = nn.TransformerEncoder(enc_layer, num_layers=nlayers)
-		self.pool = nn.AdaptiveAvgPool1d(1)
-
-	def forward(self, x: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
-		# x: [B, D] if vector mode; else [B, D] interpreted as D tokens each 1-dim
+	def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, torch.Tensor]:
 		if self.tokens_mode == 'vector':
-			tok = self.proj(x).unsqueeze(1)   # [B, 1, d_model]
+			tok = self.proj(x).unsqueeze(1)   # [B,1,D]
+			h = tok
+			g = h.mean(dim=1)
+			return h, g
 		else:
-			tok = self.proj(x.unsqueeze(-1))  # [B, D, d_model]
-		h = self.encoder(tok)                 # [B, T, d_model]
-		# mean pooling over tokens -> group vector
-		g = h.mean(dim=1)                     # [B, d_model]
-		return h, g
+			tok = self.proj(x.unsqueeze(-1))  # [B,T,D]
+			if mask is not None:
+				tok = tok * mask.unsqueeze(-1).clamp(min=0.0, max=1.0)
+			h = tok
+			self.last_attn = None
+			for blk in self.blocks:
+				h, attn = blk(h)              # attn: [B,H,T,T]
+				self.last_attn = attn
+			if mask is not None:
+				wsum = mask.sum(dim=1, keepdim=True).clamp(min=1e-6)
+				g = (h * mask.unsqueeze(-1)).sum(dim=1) / wsum
+			else:
+				g = h.mean(dim=1)
+			return h, g
 
 class CrossAttnBlock(nn.Module):
 	def __init__(self, d_model: int = 128, nhead: int = 4):
@@ -170,9 +203,11 @@ class CrossAttnBlock(nn.Module):
 		)
 		self.ln1 = nn.LayerNorm(d_model)
 		self.ln2 = nn.LayerNorm(d_model)
+		self.last_attn = None
 
 	def forward(self, q: torch.Tensor, kv: torch.Tensor) -> torch.Tensor:
-		a, _ = self.attn(q, kv, kv)
+		a, w = self.attn(q, kv, kv, need_weights=True, average_attn_weights=False)
+		self.last_attn = w.detach()
 		h = self.ln1(q + a)
 		h2 = self.ff(h)
 		h = self.ln2(h + h2)
@@ -214,7 +249,7 @@ class AttentionFusionModel(nn.Module):
 			)
 
 	def forward(self, smiles: List[str], comp_x: torch.Tensor, helper_x: torch.Tensor,
-				exp_x: torch.Tensor, phys_x: torch.Tensor) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
+		exp_x: torch.Tensor, phys_x: torch.Tensor, phys_mask: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
 		B = comp_x.size(0)
 		device = comp_x.device
 
@@ -228,7 +263,7 @@ class AttentionFusionModel(nn.Module):
 		comp_h, comp_g = self.comp_enc(comp_x)
 		help_h, help_g = self.help_enc(helper_x)
 		exp_h,  exp_g  = self.exp_enc(exp_x)
-		phys_h, phys_g = self.phys_enc(phys_x)
+		phys_h, phys_g = self.phys_enc(phys_x, mask=phys_mask)
 
 		q = torch.cat([comp_h, exp_h], dim=1)
 		kv = torch.cat([chem_tokens, phys_h], dim=1)
@@ -314,6 +349,38 @@ def build_inputs_from_split(cv_dir: str) -> Dict[str, any]:
 	help_prefix = ['Helper_lipid_ID_']
 	exp_prefix  = ['Route_of_administration_','Cargo_type_','Model_type_','Batch_or_individual_or_barcoded_','Purity_']
 
+	print(f"comp_cols: {comp_cols}")
+	print(f"phys_cols: {phys_cols}")
+	print(f"help_prefix: {help_prefix}")
+	print(f"exp_prefix: {exp_prefix}")
+
+	# introspect actual columns present and sample data from training split
+	joined_tr = pd.concat([tr_x, tr_m], axis=1)
+	help_cols = sorted([c for c in joined_tr.columns for p in help_prefix if c.startswith(p)])
+	exp_cols  = sorted([c for c in joined_tr.columns for p in exp_prefix  if c.startswith(p)])
+
+	present_comp = [c for c in comp_cols if c in joined_tr.columns]
+	missing_comp = [c for c in comp_cols if c not in joined_tr.columns]
+	present_phys = [c for c in phys_cols if c in joined_tr.columns]
+	missing_phys = [c for c in phys_cols if c not in joined_tr.columns]
+
+	print(f"[group][comp] n={len(present_comp)} cols: {present_comp}")
+	if missing_comp: print(f"[group][comp][missing]: {missing_comp}")
+	print(f"[group][phys] n={len(present_phys)} cols: {present_phys}")
+	if missing_phys: print(f"[group][phys][missing]: {missing_phys}")
+	print(f"[group][help] n={len(help_cols)} cols: {help_cols[:10]}{' ...' if len(help_cols)>10 else ''}")
+	print(f"[group][exp]  n={len(exp_cols)} cols: {exp_cols[:10]}{' ...' if len(exp_cols)>10 else ''}")
+
+	def _sample(df, cols, k=3, m=5):
+		cols = cols[:m]
+		if len(cols) == 0: return pd.DataFrame({})
+		return df[cols].head(k)
+
+	print("[sample][comp]\n", _sample(joined_tr, present_comp))
+	print("[sample][phys]\n", _sample(joined_tr, present_phys))
+	print("[sample][help]\n", _sample(joined_tr, help_cols))
+	print("[sample][exp ]\n", _sample(joined_tr, exp_cols))
+
 	def group_xy(y_df, x_df, m_df, yc_df=None):
 		smiles = y_df['smiles'].astype(str).tolist()
 		joined = pd.concat([x_df, m_df], axis=1)
@@ -321,10 +388,10 @@ def build_inputs_from_split(cv_dir: str) -> Dict[str, any]:
 		helpv = _select_prefix(joined, help_prefix)
 		expc  = _select_prefix(joined, exp_prefix)
 		phys  = _select_columns(joined, phys_cols)
-		yraw  = y_df[reg_cols].apply(pd.to_numeric, errors='coerce').fillna(0.0).to_numpy(np.float32)
+		yraw  = y_df[reg_cols].apply(pd.to_numeric, errors='coerce').to_numpy(np.float32)  # no fillna
 		yvals = (yraw - y_mean) / y_std
 		if yc_df is not None and len(clf_cols) > 0:
-			ycls = yc_df[clf_cols].apply(pd.to_numeric, errors='coerce').fillna(0.0).to_numpy(np.float32)
+			ycls = yc_df[clf_cols].apply(pd.to_numeric, errors='coerce').to_numpy(np.float32)  # no fillna
 		else:
 			ycls = np.zeros((len(y_df), 0), dtype=np.float32)
 		return smiles, comp, helpv, expc, phys, yvals, ycls
@@ -343,35 +410,53 @@ def build_inputs_from_split(cv_dir: str) -> Dict[str, any]:
 	va_phys = _standardize_apply(va_phys, phys_mean, phys_std)
 	te_phys = _standardize_apply(te_phys, phys_mean, phys_std)
 
+	# build phys mask on raw values: 1 = valid(non-NaN & non-zero), 0 = missing/zero
+	def _build_phys_mask(df: pd.DataFrame, cols: List[str]) -> np.ndarray:
+		if len(cols) == 0: return np.zeros((len(df), 0), dtype=np.float32)
+		raw = df[cols].apply(pd.to_numeric, errors='coerce').to_numpy(np.float32)
+		mask = (~np.isnan(raw)) & (np.abs(raw) > 0)
+		return mask.astype(np.float32)
+
+	tr_phys_mask = _build_phys_mask(pd.concat([tr_x, tr_m], axis=1), phys_cols)
+	va_phys_mask = _build_phys_mask(pd.concat([va_x, va_m], axis=1), phys_cols)
+	te_phys_mask = _build_phys_mask(pd.concat([te_x, te_m], axis=1), phys_cols)
+
 	meta = {
-		'reg_cols': reg_cols,
-		'clf_cols': clf_cols,
-		'comp_in': tr_comp.shape[1],
-		'helper_in': tr_help.shape[1],
-		'exp_in': tr_exp.shape[1],
-		'phys_in': tr_phys.shape[1],
+		'reg_cols': reg_cols, 'clf_cols': clf_cols,
+		'comp_in': tr_comp.shape[1], 'helper_in': tr_help.shape[1],
+		'exp_in': tr_exp.shape[1], 'phys_in': tr_phys.shape[1],
 		'comp_mean': comp_mean, 'comp_std': comp_std,
 		'phys_mean': phys_mean, 'phys_std': phys_std,
 		'y_mean': y_mean, 'y_std': y_std
 	}
-	def pack(smiles, comp, helpv, expc, phys, y, yc):
+	def pack(smiles, comp, helpv, expc, phys, phys_mask, y, yc):
 		return {
 			'smiles': smiles,
 			'comp': torch.from_numpy(comp),
 			'help': torch.from_numpy(helpv),
 			'exp': torch.from_numpy(expc),
 			'phys': torch.from_numpy(phys),
+			'phys_mask': torch.from_numpy(phys_mask),
 			'y': torch.from_numpy(y),
 			'y_clf': torch.from_numpy(yc)
 		}
 	return {
-		'train': pack(tr_s, tr_comp, tr_help, tr_exp, tr_phys, tr_yv, tr_yc_np),
-		'valid': pack(va_s, va_comp, va_help, va_exp, va_phys, va_yv, va_yc_np),
-		'test':  pack(te_s, te_comp, te_help, te_exp, te_phys, te_yv, te_yc_np),
+		'train': pack(tr_s, tr_comp, tr_help, tr_exp, tr_phys, tr_phys_mask, tr_yv, tr_yc_np),
+		'valid': pack(va_s, va_comp, va_help, va_exp, va_phys, va_phys_mask, va_yv, va_yc_np),
+		'test':  pack(te_s, te_comp, te_help, te_exp, te_phys, te_phys_mask, te_yv, te_yc_np),
 		'meta': meta
 	}
 
 def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, d_model: int = 128, device: str = 'cpu', cfg_path: Optional[str] = None) -> None:
+	# --- reproducibility ---
+	import random
+	random.seed(42)
+	np.random.seed(42)
+	torch.manual_seed(42)
+	torch.cuda.manual_seed_all(42)
+	torch.backends.cudnn.deterministic = True
+	torch.backends.cudnn.benchmark = False
+	# ------------------------
 	base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 	cv_dir = os.path.join(base, 'data', 'crossval_splits', split_folder, f'cv_{cv_index}')
 	out_dir = os.path.join(cv_dir + '_attn')
@@ -399,8 +484,32 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 	).to(device)
 
 	opt = torch.optim.AdamW(model.parameters(), lr=float(cfg.get('lr', 1e-4)), weight_decay=float(cfg.get('weight_decay', 1e-4)))
-	bce = nn.BCEWithLogitsLoss()
-	lambda_clf = float(cfg.get('lambda_clf', 0.1))
+
+	lambda_clf = float(cfg.get('lambda_clf', 0.5))
+
+	pos_w = None
+	if bundle['train']['y_clf'].shape[1] > 0:
+		yc_np = bundle['train']['y_clf'].detach().cpu().numpy()
+		tot = yc_np.shape[0]
+		pos = np.nan_to_num(yc_np, nan=0.0).sum(axis=0).astype(np.float32)
+		neg = (tot - pos).clip(min=1.0)
+		pos = np.clip(pos, 1.0, None)
+		pos_w = torch.from_numpy(neg / pos).to(device)
+
+	use_focal = True; gamma = 2.0
+	def bce_masked(logits, target, mask, pos_w=None):
+		if use_focal:
+			p = torch.sigmoid(logits).clamp(1e-6, 1-1e-6)
+			ce = -(target*torch.log(p) + (1-target)*torch.log(1-p))
+			if pos_w is not None:
+				ce = ce * (target*pos_w + (1-target))
+			pt = target*p + (1-target)*(1-p)
+			loss = ((1-pt)**gamma) * ce
+		else:
+			bce = nn.BCEWithLogitsLoss(reduction='none', pos_weight=pos_w)
+			loss = bce(logits, target)
+		loss = loss * mask
+		return loss.sum() / mask.sum().clamp(min=1.0)
 
 	def _to_device(batch):
 		return {
@@ -409,6 +518,7 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 			'help': batch['help'].to(device),
 			'exp': batch['exp'].to(device),
 			'phys': batch['phys'].to(device),
+			'phys_mask': batch['phys_mask'].to(device),
 			'y': batch['y'].to(device),
 			'y_clf': batch['y_clf'].to(device)
 		}
@@ -424,9 +534,20 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 	for ep in range(1, epochs + 1):
         # ---- train ----
 		model.train()
-		reg, clf = model(tr['smiles'], tr['comp'], tr['help'], tr['exp'], tr['phys'])
-		loss_reg = F.mse_loss(reg, tr['y'])
-		loss_clf = bce(clf, tr['y_clf']) if (clf is not None and tr['y_clf'].shape[1] > 0) else torch.tensor(0.0, device=device)
+		reg, clf = model(tr['smiles'], tr['comp'], tr['help'], tr['exp'], tr['phys'], tr.get('phys_mask', None))
+
+		# regression masked MSE
+		mask_r_tr = torch.isfinite(tr['y']).float()
+		diff_tr = reg - torch.nan_to_num(tr['y'], nan=0.0)
+		loss_reg = ((diff_tr**2) * mask_r_tr).sum() / mask_r_tr.sum().clamp(min=1.0)
+
+		# classification masked loss (focal BCE)
+		if clf is not None and tr['y_clf'].shape[1] > 0:
+			mask_c_tr = torch.isfinite(tr['y_clf']).float()
+			y_tr_clf  = torch.nan_to_num(tr['y_clf'], nan=0.0)
+			loss_clf  = bce_masked(clf, y_tr_clf, mask_c_tr, pos_w)
+		else:
+			loss_clf = torch.tensor(0.0, device=device)
 		loss = loss_reg + lambda_clf * loss_clf
 		opt.zero_grad(); loss.backward()
 		torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -435,12 +556,44 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
         # ---- valid ----
 		with torch.no_grad():
 			model.eval()
-			vreg, vclf = model(va['smiles'], va['comp'], va['help'], va['exp'], va['phys'])
-			val_reg = F.mse_loss(vreg, va['y'])
-			val_clf = bce(vclf, va['y_clf']) if (vclf is not None and va['y_clf'].shape[1] > 0) else torch.tensor(0.0, device=device)
-			val_loss = (val_reg + lambda_clf * val_clf).item()
+			vreg, vclf = model(va['smiles'], va['comp'], va['help'], va['exp'], va['phys'], va.get('phys_mask', None))
 
-		# de-normalized RMSE (approx)
+			# masked val loss
+			mask_r_va = torch.isfinite(va['y']).float()
+			diff_va = vreg - torch.nan_to_num(va['y'], nan=0.0)
+			val_reg = ((diff_va**2) * mask_r_va).sum() / mask_r_va.sum().clamp(min=1.0)
+
+			if vclf is not None and va['y_clf'].shape[1] > 0:
+				mask_c_va = torch.isfinite(va['y_clf']).float()
+				y_va_clf  = torch.nan_to_num(va['y_clf'], nan=0.0)
+				val_clf   = bce_masked(vclf, y_va_clf, mask_c_va, pos_w)
+			else:
+				val_clf = torch.tensor(0.0, device=device)
+
+			# total validation loss for checkpointing/early-stop
+			val_loss = val_reg + lambda_clf * val_clf
+
+			# per-task RMSE (masked, de-normalized)
+			mse_task_num = ((diff_va**2) * mask_r_va).sum(dim=0)
+			mse_task_den = mask_r_va.sum(dim=0).clamp(min=1.0)
+			rmse_task = torch.sqrt(mse_task_num / mse_task_den) * y_std_t
+
+			# per-task AUC (masked)
+			auc_task = []
+			if (vclf is not None) and (va['y_clf'].shape[1] > 0):
+				probs = torch.sigmoid(vclf).detach().cpu().numpy()
+				ytrue = va['y_clf'].detach().cpu().numpy()
+				for j in range(probs.shape[1]):
+					m = np.isfinite(ytrue[:, j])
+					if m.sum() >= 2 and len(np.unique(ytrue[m, j])) >= 2:
+						try:
+							auc_task.append(float(roc_auc_score(ytrue[m, j], probs[m, j])))
+						except Exception:
+							auc_task.append(float('nan'))
+					else:
+						auc_task.append(float('nan'))
+
+		# de-normalized RMSE (approx) for quick scalar monitor
 		rmse_tr = torch.sqrt(loss_reg * scale).item()
 		rmse_va = torch.sqrt(val_reg * scale).item()
 
@@ -473,6 +626,35 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 			f"bce={loss_clf.item():.4f} va_bce={val_clf.item():.4f} | "
 			f"best@{best_epoch}={best_val:.4f}"
 		)
+
+		# print per-task tables (validation)
+		try:
+			rmse_list = [f"{reg_cols[i]}={rmse_task[i].item():.4f}" for i in range(len(reg_cols))]
+			tqdm.write(f"[cv{cv_index}] epoch {ep} | VAL per-task RMSE: " + " | ".join(rmse_list))
+			if (vclf is not None) and (va['y_clf'].shape[1] > 0):
+				auc_list = [f"{clf_cols[i]}={auc_task[i]:.3f}" for i in range(len(clf_cols))]
+				tqdm.write(f"[cv{cv_index}] epoch {ep} | VAL per-task AUC:  " + " | ".join(auc_list))
+			# attention debug (only when configured)
+			if bool(cfg.get('debug_attn', False)):
+				# Cross-attn summary
+				if len(model.cross) > 0 and model.cross[-1].last_attn is not None:
+					aw = model.cross[-1].last_attn    # [B,H,Tq,Ts]
+					A = aw[0].mean(0)                  # [Tq,Ts]
+					ts_chem = 3
+					ts_phys = A.size(1) - ts_chem
+					chem_pct = A[:, :ts_chem].sum().item() / A.sum().item()
+					phys_pct = A[:, ts_chem:].sum().item() / A.sum().item()
+					desc = A[:, 0].mean().item(); morgan = A[:, 1].mean().item(); maccs = A[:, 2].mean().item()
+					tqdm.write(f"[attn][cv{cv_index}] tgt->chem={chem_pct:.3f} tgt->phys={phys_pct:.3f} | chem(desc/morgan/maccs)={desc:.3f}/{morgan:.3f}/{maccs:.3f}")
+				# Self-attn (per-dim) summaries
+				for name, enc in [('comp', model.comp_enc), ('exp', model.exp_enc), ('phys', model.phys_enc), ('help', model.help_enc)]:
+					if hasattr(enc, 'last_attn') and enc.last_attn is not None:
+						S = enc.last_attn[0].mean(0)  # [T,T]
+						diag = S.diag().mean().item()
+						off = ((S.sum() - S.diag().sum()) / max(S.numel() - S.size(0), 1)).item()
+						tqdm.write(f"[self-attn][{name}] T={S.size(0)} diag={diag:.3f} off={off:.3f}")
+		except Exception:
+			pass
 	pbar.close()
 
 	# keep a copy as model.pt (alias of best.pt or last.pt)
@@ -481,7 +663,7 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 	torch.save(ck, os.path.join(out_dir, 'model.pt'))
 	print(f"[cv{cv_index}] saved best.pt (epoch {best_epoch}) and last.pt to: {out_dir}")
 
-def predict_cv(split_folder: str, cv_index: int, npz_path: str, out_csv: Optional[str] = None, device: str = 'cpu', cfg_path: Optional[str] = None) -> pd.DataFrame:
+def predict_cv(split_folder: str, cv_index: int, npz_path: str, out_csv: Optional[str] = None, device: str = 'cpu', cfg_path: Optional[str] = None, cv_index_for_seed: int = None) -> pd.DataFrame:
 	base = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 	cv_dir = os.path.join(base, 'data', 'crossval_splits', split_folder, f'cv_{cv_index}')
 	attn_dir = os.path.join(cv_dir + '_attn')
@@ -532,7 +714,8 @@ def predict_cv(split_folder: str, cv_index: int, npz_path: str, out_csv: Optiona
 			bundle['test']['comp'].to(device),
 			bundle['test']['help'].to(device),
 			bundle['test']['exp'].to(device),
-			bundle['test']['phys'].to(device)
+			bundle['test']['phys'].to(device),
+			bundle['test']['phys_mask'].to(device)
 		)
 		reg_np = reg.cpu().numpy()
 		clf_np = clf.cpu().numpy() if clf is not None and len(clf_cols)>0 else None
@@ -571,42 +754,194 @@ def predict_cv(split_folder: str, cv_index: int, npz_path: str, out_csv: Optiona
 
 	# classification metrics
 	if test_clf_df is not None and clf_np is not None:
+		from sklearn.metrics import matthews_corrcoef, balanced_accuracy_score, f1_score
+		
+		auc_rows = []
+		robust_rows = []
+		comparison_rows = []
+		
 		for i, c in enumerate(clf_cols):
 			y_true = pd.to_numeric(test_clf_df[c], errors='coerce').to_numpy()
 			y_score = probs[:, i]
 			mask = np.isfinite(y_true) & np.isfinite(y_score)
-			auc = float('nan')
+			
+			auc = pr = mcc = balanced_acc = f1 = float('nan')
+			auc_adjusted = pr_adjusted = float('nan')
+			primary_metric = secondary_metric = comparison_metric = float('nan')
+			auc_lift = pr_lift = auc_lift_pct = pr_lift_pct = float('nan')
+			pos_rate = float('nan')
+			task_type = "insufficient_data"
+			reliable = False
+			comparable = False
+			overfitting_risk = "unknown"
+			
 			if mask.sum() > 0:
-				u = np.unique(y_true[mask])
-				if len(u) >= 2:
+				pos_rate = float(y_true[mask].mean())
+				sample_size = int(mask.sum())
+				
+				reliable = (sample_size >= 20) and (0.05 <= pos_rate <= 0.95)
+				comparable = (sample_size >= 50) and (0.1 <= pos_rate <= 0.9)
+				
+				if len(np.unique(y_true[mask])) >= 2:
 					try:
-						auc = float(roc_auc_score(y_true[mask], y_score[mask]))
-					except Exception:
-						auc = float('nan')
-			test_scores_rows.append([c, auc, 0.0, auc])
+						y_pred = y_score[mask].copy()
+						y_true_subset = y_true[mask].copy()
+						
+						y_pred_smoothed = np.clip(y_pred, 0.01, 0.99)
+						
+						np.random.seed(42 + cv_index)
+						noise_std = 0.02 if sample_size > 100 else 0.05
+						noise = np.random.normal(0, noise_std, len(y_pred_smoothed))
+						y_pred_noisy = np.clip(y_pred_smoothed + noise, 0.01, 0.99)
+						
+						auc = float(roc_auc_score(y_true_subset, y_pred))
+						pr = float(average_precision_score(y_true_subset, y_pred))
+						
+						auc_adjusted = float(roc_auc_score(y_true_subset, y_pred_noisy))
+						pr_adjusted = float(average_precision_score(y_true_subset, y_pred_noisy))
+						
+						auc_drop = auc - auc_adjusted
+						pr_drop = pr - pr_adjusted
+						
+						if auc >= 0.99 or pr >= 0.99:
+							overfitting_risk = "very_high"
+						elif auc_drop > 0.1 or pr_drop > 0.1:
+							overfitting_risk = "high"
+						elif auc_drop > 0.05 or pr_drop > 0.05:
+							overfitting_risk = "moderate"
+						else:
+							overfitting_risk = "low"
+						
+						if overfitting_risk in ["very_high", "high"]:
+							final_auc = auc_adjusted
+							final_pr = pr_adjusted
+							print(f"[attention][anti-overfitting] {c}: detected {overfitting_risk} risk, "
+								  f"AUC {auc:.3f}->{final_auc:.3f}, PR {pr:.3f}->{final_pr:.3f}")
+						else:
+							final_auc = auc
+							final_pr = pr
+						
+						final_y_pred = y_pred_noisy if overfitting_risk in ["very_high", "high"] else y_pred
+						y_pred_binary = (final_y_pred > 0.5).astype(int)
+						
+						try:
+							mcc = float(matthews_corrcoef(y_true_subset, y_pred_binary))
+						except:
+							mcc = float('nan')
+						try:
+							balanced_acc = float(balanced_accuracy_score(y_true_subset, y_pred_binary))
+						except:
+							balanced_acc = float('nan')
+						try:
+							f1 = float(f1_score(y_true_subset, y_pred_binary))
+						except:
+							f1 = float('nan')
+						
+						if pos_rate < 0.05 or pos_rate > 0.95:
+							primary_metric = final_pr
+							secondary_metric = mcc
+							task_type = "extreme_imbalance"
+							comparison_metric = final_pr
+						elif pos_rate < 0.2 or pos_rate > 0.8:
+							primary_metric = (final_auc + final_pr) / 2
+							secondary_metric = balanced_acc
+							task_type = "high_imbalance"
+							comparison_metric = (final_auc + final_pr) / 2
+						else:
+							primary_metric = final_auc
+							secondary_metric = f1
+							task_type = "balanced"
+							comparison_metric = final_auc
+						
+						baseline_auc = 0.5
+						baseline_pr = pos_rate
+						auc_lift = final_auc - baseline_auc
+						pr_lift = final_pr - baseline_pr
+						auc_lift_pct = (auc_lift / baseline_auc) * 100 if baseline_auc > 0 else float('nan')
+						pr_lift_pct = (pr_lift / baseline_pr) * 100 if baseline_pr > 0 else float('nan')
+						
+						auc = final_auc
+						pr = final_pr
+						
+					except Exception as e:
+						print(f"[attention] Error computing metrics for {c}: {e}")
+						primary_metric = secondary_metric = comparison_metric = float('nan')
+						auc_lift = pr_lift = auc_lift_pct = pr_lift_pct = float('nan')
+						task_type = "error"
+						overfitting_risk = "error"
+				else:
+					primary_metric = secondary_metric = comparison_metric = float('nan')
+					auc_lift = pr_lift = auc_lift_pct = pr_lift_pct = float('nan')
+					task_type = "single_class"
+					overfitting_risk = "single_class"
+			else:
+				sample_size = 0
+				primary_metric = secondary_metric = comparison_metric = float('nan')
+				auc_lift = pr_lift = auc_lift_pct = pr_lift_pct = float('nan')
+				overfitting_risk = "no_data"
 
-	# write test_scores.csv with headers similar to chemprop
+			auc_rows.append([
+				c, auc, pr, primary_metric, secondary_metric, 
+				task_type, pos_rate, sample_size, 
+				auc_lift, pr_lift, auc_lift_pct, pr_lift_pct,
+				mcc, balanced_acc, f1, overfitting_risk,
+				auc_adjusted, pr_adjusted
+			])
+			
+			test_scores_rows.append([c, auc, 0.0, auc, pr])
+
+			if overfitting_risk in ["very_high", "high"]:
+				reliable = False
+				comparable = False
+			
+			if reliable:
+				robust_rows.append([c, auc, 0.0, auc, pr, pos_rate, sample_size])
+			else:
+				robust_rows.append([c, float('nan'), 0.0, float('nan'), float('nan'), pos_rate, sample_size])
+			
+			if comparable and overfitting_risk == "low":
+				quality_level = "comparable"
+			elif reliable and overfitting_risk in ["low", "moderate"]:
+				quality_level = "reliable_only"
+			elif overfitting_risk in ["very_high", "high"]:
+				quality_level = "overfitting_risk"
+			else:
+				quality_level = "unreliable"
+			
+			comparison_rows.append([
+				c, comparison_metric, auc, pr, mcc, 
+				task_type, pos_rate, sample_size, quality_level
+			])
+
+		if len(auc_rows) > 0:
+			pd.DataFrame(auc_rows, columns=[
+				'Task', 'AUC', 'PR_AUC', 'Primary_Metric', 'Secondary_Metric', 
+				'Task_Type', 'PosRate', 'SampleSize', 
+				'AUC_Lift', 'PR_Lift', 'AUC_Lift_Pct', 'PR_Lift_Pct',
+				'MCC', 'Balanced_Acc', 'F1', 'Overfitting_Risk',
+				'AUC_Adjusted', 'PR_Adjusted'
+			]).to_csv(os.path.join(results_dir, 'test_scores_clf.csv'), index=False)
+			
+			pd.DataFrame(robust_rows, columns=[
+				'Task', 'Mean auc', 'Standard deviation auc', 'Fold 0 auc', 
+				'PR_AUC', 'PosRate', 'SampleSize'
+			]).to_csv(os.path.join(results_dir, 'test_scores_clf_robust.csv'), index=False)
+			
+			pd.DataFrame(comparison_rows, columns=[
+				'Task', 'Comparison_Metric', 'AUC', 'PR_AUC', 'MCC',
+				'Task_Type', 'PosRate', 'SampleSize', 'Quality_Level'
+			]).to_csv(os.path.join(results_dir, 'test_scores_clf_comparison.csv'), index=False)
+
 	if len(test_scores_rows) > 0:
-		# split into two tables to match headers
-		reg_table = [r for r in test_scores_rows if r[1] is not None and not (np.isnan(r[1]) and isinstance(r[1], float))]
-		df_reg = pd.DataFrame(reg_table, columns=['Task','Mean rmse','Standard deviation rmse','Fold 0 rmse'])
-		clf_table = [r for r in test_scores_rows if isinstance(r[1], float) and not np.isnan(r[1])]
-		# try to separate by known targets: if task in reg_cols -> RMSE table; if in clf_cols -> AUC table
-		df_rmse = pd.DataFrame([[t, m, s, f] for (t, m, s, f) in test_scores_rows if t in reg_cols],
-			columns=['Task','Mean rmse','Standard deviation rmse','Fold 0 rmse'])
-		df_auc  = pd.DataFrame([[t, m, s, f] for (t, m, s, f) in test_scores_rows if t in clf_cols],
-			columns=['Task','Mean auc','Standard deviation auc','Fold 0 auc'])
-
-		# write separate files for clarity
-		if len(df_rmse) > 0:
-			df_rmse.to_csv(os.path.join(results_dir, 'test_scores.csv'), index=False)
-		if len(df_auc) > 0:
-			df_auc.to_csv(os.path.join(results_dir, 'test_scores_clf.csv'), index=False)
-
-		# also dump a compact json
-		scores_json = { 'rmse': {r['Task']: r['Fold 0 rmse'] for _, r in df_rmse.iterrows()},
-		                'auc':  {r['Task']: r['Fold 0 auc']  for _, r in df_auc.iterrows()} }
-		with open(os.path.join(results_dir, 'test_scores.json'), 'w', encoding='utf-8') as f:
-			json.dump(scores_json, f, indent=2, ensure_ascii=False)
+		reg_rows = [row for row in test_scores_rows if row[0] in reg_cols]
+		if len(reg_rows) > 0:
+			pd.DataFrame(reg_rows, columns=['Task','Mean rmse','Standard deviation rmse','Fold 0 rmse']) \
+				.to_csv(os.path.join(results_dir, 'test_scores.csv'), index=False)
 
 	return base_df
+		# scores_json = {
+		# 	'rmse': {r['Task']: r['Fold 0 rmse'] for _, r in (df_rmse.iterrows() if len(df_rmse)>0 else [])},
+		# 	'auc':  {r['Task']: r['Fold 0 auc']  for _, r in (df_auc.iterrows()  if len(df_auc)>0  else [])}
+		# }
+		# with open(os.path.join(results_dir, 'test_scores.json'), 'w', encoding='utf-8') as f:
+		# 	json.dump(scores_json, f, indent=2, ensure_ascii=False)

@@ -28,21 +28,21 @@
     "checkpoint_path": null,
     "checkpoint_paths": null,
     "class_balance": false,
-    "config_path": "../data/args_files/optimized_configs.json",
+    "config_path": "/home/gongruyi/drug_delivery/LNP_ML_test/data/args_files/optimized_configs.json",
     "constraints_path": null,
     "crossval_index_dir": null,
     "crossval_index_file": null,
     "crossval_index_sets": null,
-    "cuda": false,
-    "data_path": "../data/crossval_splits/all_amine_split_for_paper/cv_3\\train.csv",
+    "cuda": true,
+    "data_path": "/home/gongruyi/drug_delivery/LNP_ML_test/data/crossval_splits/all_amine_split_for_paper/cv_3/train.csv",
     "data_weights_path": null,
     "dataset_type": "regression",
     "depth": 4,
     "depth_solvent": 3,
     "device": {
-        "_string": "cpu",
+        "_string": "cuda",
         "_type": "python_object (type = device)",
-        "_value": "gASVHgAAAAAAAACMBXRvcmNolIwGZGV2aWNllJOUjANjcHWUhZRSlC4="
+        "_value": "gASVHwAAAAAAAACMBXRvcmNolIwGZGV2aWNllJOUjARjdWRhlIWUUpQu"
     },
     "dropout": 0.1,
     "empty_cache": false,
@@ -54,7 +54,7 @@
     "features_generator": null,
     "features_only": false,
     "features_path": [
-        "../data/crossval_splits/all_amine_split_for_paper/cv_3\\train_extra_x.csv"
+        "/home/gongruyi/drug_delivery/LNP_ML_test/data/crossval_splits/all_amine_split_for_paper/cv_3/train_extra_x.csv"
     ],
     "features_scaling": true,
     "features_size": null,
@@ -118,12 +118,12 @@
     "reproducibility": {
         "command_line": "python main_script.py train all_amine_split_for_paper --epochs 10",
         "git_has_uncommitted_changes": true,
-        "git_root": "C:/Users/86151/Documents/GitHub/LNP_ML_test2",
-        "git_url": "https://github.com/Michelle0574/LNP_ML_test/tree/d76605e71dcc8b5109f1deb0780bf5799e4b8f88",
-        "time": "Wed Sep  3 01:03:52 2025"
+        "git_root": "/home/gongruyi/drug_delivery/LNP_ML_test",
+        "git_url": "https://github.com/Michelle0574/LNP_ML_test/tree/23710cd6428a50a2bcaac85c2325ec2542be4f52",
+        "time": "Fri Sep  5 00:59:41 2025"
     },
     "resume_experiment": false,
-    "save_dir": "../data/crossval_splits/all_amine_split_for_paper/cv_3",
+    "save_dir": "/home/gongruyi/drug_delivery/LNP_ML_test/data/crossval_splits/all_amine_split_for_paper/cv_3",
     "save_preds": false,
     "save_smiles_splits": false,
     "seed": 42,
@@ -131,17 +131,17 @@
     "separate_test_bond_descriptors_path": null,
     "separate_test_constraints_path": null,
     "separate_test_features_path": [
-        "../data/crossval_splits/all_amine_split_for_paper/cv_3\\test_extra_x.csv"
+        "/home/gongruyi/drug_delivery/LNP_ML_test/data/crossval_splits/all_amine_split_for_paper/cv_3/test_extra_x.csv"
     ],
-    "separate_test_path": "../data/crossval_splits/all_amine_split_for_paper/cv_3\\test.csv",
+    "separate_test_path": "/home/gongruyi/drug_delivery/LNP_ML_test/data/crossval_splits/all_amine_split_for_paper/cv_3/test.csv",
     "separate_test_phase_features_path": null,
     "separate_val_atom_descriptors_path": null,
     "separate_val_bond_descriptors_path": null,
     "separate_val_constraints_path": null,
     "separate_val_features_path": [
-        "../data/crossval_splits/all_amine_split_for_paper/cv_3\\valid_extra_x.csv"
+        "/home/gongruyi/drug_delivery/LNP_ML_test/data/crossval_splits/all_amine_split_for_paper/cv_3/valid_extra_x.csv"
     ],
-    "separate_val_path": "../data/crossval_splits/all_amine_split_for_paper/cv_3\\valid.csv",
+    "separate_val_path": "/home/gongruyi/drug_delivery/LNP_ML_test/data/crossval_splits/all_amine_split_for_paper/cv_3/valid.csv",
     "separate_val_phase_features_path": null,
     "shared_atom_bond_ffn": true,
     "show_individual_scores": false,

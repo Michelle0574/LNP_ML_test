@@ -1,0 +1,16 @@
+Task,Mean auc,Standard deviation auc,Fold 0 auc,PR_AUC
+Encapsulation_Efficiency_EE<50,,0.0,,
+Encapsulation_Efficiency_50<=EE<80,,0.0,,
+Encapsulation_Efficiency_80<EE<=100,,0.0,,
+Delivery_target_lymph_nodes,,0.0,,
+chronic_toxicity_none,,0.0,,
+acute_toxicity_none,,0.0,,
+acute_toxicity_present,,0.0,,
+Delivery_target_dendritic_cell,,0.0,,
+Delivery_target_generic_cell,0.9314630681818182,0.0,0.9314630681818182,0.9863228102287698
+Delivery_target_macrophage,,0.0,,
+Delivery_target_lung_epithelium,0.6003151260504203,0.0,0.6003151260504203,0.4566730451210059
+Delivery_target_liver,0.5540540540540541,0.0,0.5540540540540541,0.021748400852878463
+Delivery_target_lung,0.9121621621621622,0.0,0.9121621621621622,0.09453781512605042
+Delivery_target_spleen,0.985445205479452,0.0,0.985445205479452,0.6071428571428572
+Delivery_target_muscle,0.02702702702702703,0.0,0.02702702702702703,0.010212765957446808

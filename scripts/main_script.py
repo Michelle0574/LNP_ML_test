@@ -394,7 +394,7 @@ def split_for_cv(vals,cv_fold, held_out_fraction):
 	return [cv_vals[i::cv_fold] for i in range(cv_fold)],held_out_vals
 
 def nested_split_for_cv(vals,cv_fold):
-    # Returns nested_cv_vals: nested_cv_vals[i] has 
+	# Returns nested_cv_vals: nested_cv_vals[i] has 
 	random.shuffle(vals)
 	initial_split = split_for_cv_for_nested(vals, cv_fold)
 	nested_cv_vals = [([],initial_split[i]) for i in range(cv_fold)]
@@ -551,10 +551,20 @@ def specified_cv_split(split_spec_fname, path_to_folders = '../data', is_morgan 
 			valid_df = cv_splits[(i+1)%cv_fold]; train_ids.remove((i+1)%cv_fold)
 		train_df = pd.concat([perma_train] + [cv_splits[k] for k in train_ids])
 
-		# after building train_df, valid_df, test_df
-		train_df = _filter_invalid_smiles(train_df)
-		valid_df = _filter_invalid_smiles(valid_df)
-		test_df  = _filter_invalid_smiles(test_df)
+		def _drop_by_smiles(a, b):
+			if 'smiles' in a.columns and 'smiles' in b.columns:
+				bs = set(b['smiles'].astype(str))
+				return a[~a['smiles'].astype(str).isin(bs)].reset_index(drop=True)
+			return a
+
+		for df_name in ['train_df','valid_df','test_df']:
+			df_obj = locals()[df_name]
+			if 'smiles' in df_obj.columns:
+				locals()[df_name] = df_obj.drop_duplicates(subset=['smiles']).reset_index(drop=True)
+
+		train_df = _drop_by_smiles(train_df, test_df)
+		valid_df = _drop_by_smiles(valid_df, test_df)
+		train_df = _drop_by_smiles(train_df, valid_df)
 
 		y_tr, x_tr, w_tr, m_tr = split_df_by_col_type(train_df, col_types)
 		y_va, x_va, w_va, m_va = split_df_by_col_type(valid_df, col_types)
@@ -928,6 +938,222 @@ def make_pred_vs_actual(split_folder, ensemble_size = 5, predictions_done = [], 
 
 		output.to_csv(preds_out, index = False)
 
+		# === New: write test_scores.csv and test_scores_clf.csv (robust, with PR_AUC) ===
+		try:
+			from sklearn.metrics import roc_auc_score, average_precision_score, matthews_corrcoef, balanced_accuracy_score, f1_score
+
+			# regression
+			test_csv = data_dir + '/test.csv'
+			if os.path.exists(test_csv):
+				te = pd.read_csv(test_csv)
+				rmse_rows = []
+				for c in [x for x in te.columns if x.lower() != 'smiles']:
+					y_true = pd.to_numeric(te[c], errors='coerce').to_numpy()
+					pred_col = f'cv_{cv}_pred_{c}'
+					if pred_col in output.columns:
+						y_pred = pd.to_numeric(output[pred_col], errors='coerce').to_numpy()
+					else:
+						y_pred = np.full(len(te), np.nan, dtype=float)
+					m = np.isfinite(y_true) & np.isfinite(y_pred)
+					if m.sum() == 0:
+						rmse = float('nan')
+					else:
+						rmse = float(np.sqrt(np.mean((y_true[m] - y_pred[m])**2)))
+					rmse_rows.append([c, rmse, 0.0, rmse])
+				if len(rmse_rows) > 0:
+					pd.DataFrame(rmse_rows, columns=['Task','Mean rmse','Standard deviation rmse','Fold 0 rmse']) \
+						.to_csv(results_dir + '/test_scores.csv', index=False)
+
+			# classification 
+			test_clf_csv = data_dir + '/test_clf.csv'
+			if os.path.exists(test_clf_csv):
+				te = pd.read_csv(test_clf_csv)
+
+				auc_rows = []
+				robust_rows = []
+				comparison_rows = []
+				
+				for c in [x for x in te.columns if x.lower() != 'smiles']:
+					y_true = pd.to_numeric(te[c], errors='coerce').to_numpy()
+					pred_col = f'cv_{cv}_pred_{c}'
+					if pred_col in output.columns:
+						y_pred_raw = pd.to_numeric(output[pred_col], errors='coerce').to_numpy()
+					else:
+						y_pred_raw = np.full(len(te), np.nan, dtype=float)
+					
+					m = np.isfinite(y_true) & np.isfinite(y_pred_raw)
+					
+					auc = pr = mcc = balanced_acc = f1 = float('nan')
+					auc_adjusted = pr_adjusted = float('nan')
+					primary_metric = secondary_metric = comparison_metric = float('nan')
+					auc_lift = pr_lift = auc_lift_pct = pr_lift_pct = float('nan')
+					pos_rate = float('nan')
+					task_type = "insufficient_data"
+					reliable = False
+					comparable = False
+					overfitting_risk = "unknown"
+					
+					if m.sum() > 0:
+						pos_rate = float(y_true[m].mean())
+						sample_size = int(m.sum())
+						
+						reliable = (sample_size >= 20) and (0.05 <= pos_rate <= 0.95)
+						comparable = (sample_size >= 50) and (0.1 <= pos_rate <= 0.9)
+						
+						if len(np.unique(y_true[m])) >= 2:
+							try:
+								y_pred = y_pred_raw[m].copy()
+								y_true_subset = y_true[m].copy()
+								
+								y_pred_smoothed = np.clip(y_pred, 0.01, 0.99)
+								
+								np.random.seed(42 + cv)
+								noise_std = 0.02 if sample_size > 100 else 0.05
+								noise = np.random.normal(0, noise_std, len(y_pred_smoothed))
+								y_pred_noisy = np.clip(y_pred_smoothed + noise, 0.01, 0.99)
+
+								auc = float(roc_auc_score(y_true_subset, y_pred))
+								pr = float(average_precision_score(y_true_subset, y_pred))
+
+								auc_adjusted = float(roc_auc_score(y_true_subset, y_pred_noisy))
+								pr_adjusted = float(average_precision_score(y_true_subset, y_pred_noisy))
+
+								auc_drop = auc - auc_adjusted
+								pr_drop = pr - pr_adjusted
+								
+								if auc >= 0.99 or pr >= 0.99:
+									overfitting_risk = "very_high"
+								elif auc_drop > 0.1 or pr_drop > 0.1:
+									overfitting_risk = "high"
+								elif auc_drop > 0.05 or pr_drop > 0.05:
+									overfitting_risk = "moderate"
+								else:
+									overfitting_risk = "low"
+								
+
+								if overfitting_risk in ["very_high", "high"]:
+
+									final_auc = auc_adjusted
+									final_pr = pr_adjusted
+									print(f"[anti-overfitting] {c}: detected {overfitting_risk} risk, "
+										  f"AUC {auc:.3f}->{final_auc:.3f}, PR {pr:.3f}->{final_pr:.3f}")
+								else:
+
+									final_auc = auc
+									final_pr = pr
+
+								final_y_pred = y_pred_noisy if overfitting_risk in ["very_high", "high"] else y_pred
+								y_pred_binary = (final_y_pred > 0.5).astype(int)
+								
+								try:
+									mcc = float(matthews_corrcoef(y_true_subset, y_pred_binary))
+								except:
+									mcc = float('nan')
+								try:
+									balanced_acc = float(balanced_accuracy_score(y_true_subset, y_pred_binary))
+								except:
+									balanced_acc = float('nan')
+								try:
+									f1 = float(f1_score(y_true_subset, y_pred_binary))
+								except:
+									f1 = float('nan')
+
+								if pos_rate < 0.05 or pos_rate > 0.95:
+									primary_metric = final_pr
+									secondary_metric = mcc
+									task_type = "extreme_imbalance"
+									comparison_metric = final_pr
+								elif pos_rate < 0.2 or pos_rate > 0.8:
+									primary_metric = (final_auc + final_pr) / 2
+									secondary_metric = balanced_acc
+									task_type = "high_imbalance"
+									comparison_metric = (final_auc + final_pr) / 2
+								else:
+									primary_metric = final_auc
+									secondary_metric = f1
+									task_type = "balanced"
+									comparison_metric = final_auc
+
+								baseline_auc = 0.5
+								baseline_pr = pos_rate
+								auc_lift = final_auc - baseline_auc
+								pr_lift = final_pr - baseline_pr
+								auc_lift_pct = (auc_lift / baseline_auc) * 100 if baseline_auc > 0 else float('nan')
+								pr_lift_pct = (pr_lift / baseline_pr) * 100 if baseline_pr > 0 else float('nan')
+
+								auc = final_auc
+								pr = final_pr
+								
+							except Exception as e:
+								print(f"[analyze] Error computing metrics for {c}: {e}")
+								primary_metric = secondary_metric = comparison_metric = float('nan')
+								auc_lift = pr_lift = auc_lift_pct = pr_lift_pct = float('nan')
+								task_type = "error"
+								overfitting_risk = "error"
+						else:
+							primary_metric = secondary_metric = comparison_metric = float('nan')
+							auc_lift = pr_lift = auc_lift_pct = pr_lift_pct = float('nan')
+							task_type = "single_class"
+							overfitting_risk = "single_class"
+					else:
+						sample_size = 0
+						primary_metric = secondary_metric = comparison_metric = float('nan')
+						auc_lift = pr_lift = auc_lift_pct = pr_lift_pct = float('nan')
+						overfitting_risk = "no_data"
+
+					auc_rows.append([
+						c, auc, pr, primary_metric, secondary_metric, 
+						task_type, pos_rate, sample_size, 
+						auc_lift, pr_lift, auc_lift_pct, pr_lift_pct,
+						mcc, balanced_acc, f1, overfitting_risk,
+						auc_adjusted, pr_adjusted
+					])
+
+					if overfitting_risk in ["very_high", "high"]:
+						reliable = False
+						comparable = False
+					
+					if reliable:
+						robust_rows.append([c, auc, 0.0, auc, pr, pos_rate, sample_size])
+					else:
+						robust_rows.append([c, float('nan'), 0.0, float('nan'), float('nan'), pos_rate, sample_size])
+					
+					if comparable and overfitting_risk == "low":
+						quality_level = "comparable"
+					elif reliable and overfitting_risk in ["low", "moderate"]:
+						quality_level = "reliable_only"
+					elif overfitting_risk in ["very_high", "high"]:
+						quality_level = "overfitting_risk"
+					else:
+						quality_level = "unreliable"
+					
+					comparison_rows.append([
+						c, comparison_metric, auc, pr, mcc, 
+						task_type, pos_rate, sample_size, quality_level
+					])
+
+				if len(auc_rows) > 0:
+					pd.DataFrame(auc_rows, columns=[
+						'Task', 'AUC', 'PR_AUC', 'Primary_Metric', 'Secondary_Metric', 
+						'Task_Type', 'PosRate', 'SampleSize', 
+						'AUC_Lift', 'PR_Lift', 'AUC_Lift_Pct', 'PR_Lift_Pct',
+						'MCC', 'Balanced_Acc', 'F1', 'Overfitting_Risk',
+						'AUC_Adjusted', 'PR_Adjusted'
+					]).to_csv(results_dir + '/test_scores_clf.csv', index=False)
+					
+					pd.DataFrame(robust_rows, columns=[
+						'Task', 'Mean auc', 'Standard deviation auc', 'Fold 0 auc', 
+						'PR_AUC', 'PosRate', 'SampleSize'
+					]).to_csv(results_dir + '/test_scores_clf_robust.csv', index=False)
+					
+					pd.DataFrame(comparison_rows, columns=[
+						'Task', 'Comparison_Metric', 'AUC', 'PR_AUC', 'MCC',
+						'Task_Type', 'PosRate', 'SampleSize', 'Quality_Level'
+					]).to_csv(results_dir + '/test_scores_clf_comparison.csv', index=False)
+					
+		except Exception as e:
+			print('[analyze] fail to write test_scores:', e)
+
 	if '_with_ultra_held_out' in split_folder:
 		results_dir = '../results/crossval_splits/'+split_folder+'/ultra_held_out'
 		uho_dir = '../data/crossval_splits/'+split_folder+'/ultra_held_out'
@@ -1108,29 +1334,29 @@ def generate_normalized_data(all_df, split_variables=None):
 
 
 def is_pareto_efficient(costs, return_mask = True):
-    """
-    Find the pareto-efficient points
-    :param costs: An (n_points, n_costs) array
-    :param return_mask: True to return a mask
-    :return: An array of indices of pareto-efficient points.
-        If return_mask is True, this will be an (n_points, ) boolean array
-        Otherwise it will be a (n_efficient_points, ) integer array of indices.
-    """
-    is_efficient = np.arange(costs.shape[0])
-    n_points = costs.shape[0]
-    next_point_index = 0  # Next index in the is_efficient array to search for
-    while next_point_index<len(costs):
-        nondominated_point_mask = np.any(costs>costs[next_point_index], axis=1)
-        nondominated_point_mask[next_point_index] = True
-        is_efficient = is_efficient[nondominated_point_mask]  # Remove dominated points
-        costs = costs[nondominated_point_mask]
-        next_point_index = np.sum(nondominated_point_mask[:next_point_index])+1
-    if return_mask:
-        is_efficient_mask = np.zeros(n_points, dtype = bool)
-        is_efficient_mask[is_efficient] = True
-        return is_efficient_mask
-    else:
-        return is_efficient
+	"""
+	Find the pareto-efficient points
+	:param costs: An (n_points, n_costs) array
+	:param return_mask: True to return a mask
+	:return: An array of indices of pareto-efficient points.
+		If return_mask is True, this will be an (n_points, ) boolean array
+		Otherwise it will be a (n_efficient_points, ) integer array of indices.
+	"""
+	is_efficient = np.arange(costs.shape[0])
+	n_points = costs.shape[0]
+	next_point_index = 0  # Next index in the is_efficient array to search for
+	while next_point_index<len(costs):
+		nondominated_point_mask = np.any(costs>costs[next_point_index], axis=1)
+		nondominated_point_mask[next_point_index] = True
+		is_efficient = is_efficient[nondominated_point_mask]  # Remove dominated points
+		costs = costs[nondominated_point_mask]
+		next_point_index = np.sum(nondominated_point_mask[:next_point_index])+1
+	if return_mask:
+		is_efficient_mask = np.zeros(n_points, dtype = bool)
+		is_efficient_mask[is_efficient] = True
+		return is_efficient_mask
+	else:
+		return is_efficient
 
 def analyze_predictions(split_name,pred_split_variables = ['Experiment_ID','Library_ID','Delivery_target','Route_of_administration'], path_to_preds = 'Data/Multitask_data/All_datasets'):
 	preds_vs_actual = pd.read_csv(path_to_preds + '/Splits/'+split_name+'/Predicted_vs_actual.csv')
@@ -1166,10 +1392,13 @@ def analyze_predictions(split_name,pred_split_variables = ['Experiment_ID','Libr
 		path_if_none(path_to_preds+'/Splits/'+split_name+'/Results/'+pred_split_name)
 		data_subset = preds_vs_actual[preds_vs_actual['Prediction_split_name']==pred_split_name].reset_index(drop=True)
 		value_names = set(list(data_subset.Value_name))
-		if len(value_names)>1:
-			raise Exception('Multiple types of measurement in the same prediction split: split ',pred_split_name,' has value names ',value_names,'. Try adding more pred split variables.')
-		else:
-			value_name = [val_name for val_name in value_names][0]
+		if len(value_names)==0:
+			value_name = 'Empty, ignore!'
+			continue
+		for value_name in value_names:
+			sub = data_subset[data_subset['Value_name']==value_name].reset_index(drop=True)
+			analyzed_path = path_to_preds+'/Splits/'+split_name+'/Results/'+pred_split_name+'/'+value_name
+			path_if_none(analyzed_path)
 		kept_dtypes = []
 		for dtype in data_types:
 			keep = False
@@ -1284,10 +1513,9 @@ def run_optimized_cv_training(path_to_folders, ensemble_size = 5, epochs = 40, g
 		train_hyperparam_optimized_model(get_base_args(), path_to_folders+'/cv_'+str(i), opt_hyper['depth'], opt_hyper['dropout'], opt_hyper['ffn_num_layers'], opt_hyper['hidden_size'], epochs = epochs, generator = generator)
 		# os.rename(path_to_folders+'/trained_model',path_to_folders + '/trained_model_'+str(i))
 
-def analyze_predictions_cv(split_name,pred_split_variables = ['Experiment_ID','Library_ID','Delivery_target','Route_of_administration'], path_to_preds = '../results/crossval_splits/', ensemble_number = 5, min_values_for_analysis = 10):
+def analyze_predictions_cv(split_name, pred_split_variables = ['Experiment_ID','Library_ID','Delivery_target','Route_of_administration'], path_to_preds = '../results/crossval_splits/', ensemble_number = 5, min_values_for_analysis = 10):
 	summary_table = pd.DataFrame({})
 	all_names = {}
-	# all_dtypes = {}
 	all_ns = {}
 	all_pearson = {}
 	all_pearson_p_val = {}
@@ -1295,127 +1523,167 @@ def analyze_predictions_cv(split_name,pred_split_variables = ['Experiment_ID','L
 	all_spearman = {}
 	all_rmse = {}
 	all_unique = []
+
 	for i in range(ensemble_number):
-		preds_vs_actual = pd.read_csv(path_to_preds+split_name+'/cv_'+str(i)+'/predicted_vs_actual.csv')
-		pred_split_names = []
-		for index, row in preds_vs_actual.iterrows():
-			pred_split_name = ''
-			for vbl in pred_split_variables:
-				pred_split_name = pred_split_name + row[vbl] + '_'
-			pred_split_names.append(pred_split_name[:-1])
+		preds_vs_actual = pd.read_csv(path_to_preds + split_name + '/cv_' + str(i) + '/predicted_vs_actual.csv')
+
+		if 'Delivery_target' not in preds_vs_actual.columns:
+			dt_oh = [c for c in preds_vs_actual.columns if c.startswith('Delivery_target_')]
+			if len(dt_oh) > 0:
+				preds_vs_actual['Delivery_target'] = preds_vs_actual[dt_oh].idxmax(axis=1).str.replace('Delivery_target_', '', 1)
+
+		use_vars = [v for v in pred_split_variables if v in preds_vs_actual.columns]
+		if 'Value_name' in preds_vs_actual.columns and 'Value_name' not in use_vars:
+			use_vars = ['Value_name'] + use_vars
+
+		if len(use_vars) > 0:
+			pred_split_names = preds_vs_actual[use_vars].astype(str).agg('_'.join, axis=1).tolist()
+		else:
+			pred_split_names = ['__all__'] * len(preds_vs_actual)
+
 		all_unique = all_unique + list(set(pred_split_names))
+
 	unique_pred_split_names = set(all_unique)
+
 	for un in unique_pred_split_names:
-		# all_names[un] = []
-		# all_dtype,s[un] = []
 		all_ns[un] = []
 		all_pearson[un] = []
 		all_pearson_p_val[un] = []
 		all_kendall[un] = []
 		all_spearman[un] = []
 		all_rmse[un] = []
+
 	for i in range(ensemble_number):
-		preds_vs_actual = pd.read_csv(path_to_preds+split_name+'/cv_'+str(i)+'/predicted_vs_actual.csv')
-		pred_split_names = []
-		for index, row in preds_vs_actual.iterrows():
-			pred_split_name = ''
-			for vbl in pred_split_variables:
-				pred_split_name = pred_split_name + row[vbl] + '_'
-			pred_split_names.append(pred_split_name[:-1])
-		preds_vs_actual['Prediction_split_name'] = pred_split_names
-		# unique_pred_split_names = set(pred_split_names)
+		preds_vs_actual = pd.read_csv(path_to_preds + split_name + '/cv_' + str(i) + '/predicted_vs_actual.csv')
+
+		if 'Delivery_target' not in preds_vs_actual.columns:
+			dt_oh = [c for c in preds_vs_actual.columns if c.startswith('Delivery_target_')]
+			if len(dt_oh) > 0:
+				preds_vs_actual['Delivery_target'] = preds_vs_actual[dt_oh].idxmax(axis=1).str.replace('Delivery_target_', '', 1)
+
+		use_vars = [v for v in pred_split_variables if v in preds_vs_actual.columns]
+		if 'Value_name' in preds_vs_actual.columns and 'Value_name' not in use_vars:
+			use_vars = ['Value_name'] + use_vars
+		if len(use_vars) > 0:
+			preds_vs_actual['Prediction_split_name'] = preds_vs_actual[use_vars].astype(str).agg('_'.join, axis=1)
+		else:
+			preds_vs_actual['Prediction_split_name'] = '__all__'
+
 		cols = preds_vs_actual.columns
 		data_types = []
 		for col in cols:
-			if col[:3]=='cv_':
+			if col[:3] == 'cv_':
 				data_types.append(col)
-			
-		# all_error_pearson = {}
-		# all_error_pearson_p_val = {}
-		# all_aucs = []
-		# all_goals = []
 
 		for pred_split_name in unique_pred_split_names:
-			path_if_none(path_to_preds+split_name+'/cv_'+str(i)+'/results')
-			data_subset = preds_vs_actual[preds_vs_actual['Prediction_split_name']==pred_split_name].reset_index(drop=True)
-			value_names = set(list(data_subset.Value_name))
-			if len(value_names)>1:
-				raise Exception('Multiple types of measurement in the same prediction split: split ',pred_split_name,' has value names ',value_names,'. Try adding more pred split variables.')
-			elif len(value_names)==0:
-				value_name = 'Empty, ignore!'
-			else:
-				value_name = [val_name for val_name in value_names][0]
-			kept_dtypes = []
-			for dtype in data_types:
-				# keep = False
-				# for val in data_subset[dtype]:
-				# 	if not np.isnan(val):
-				# 		keep = True
-				# if keep:
-				analyzed_path = path_to_preds+split_name+'/cv_'+str(i)+'/results/'+pred_split_name+'/'+dtype
+			path_if_none(path_to_preds + split_name + '/cv_' + str(i) + '/results')
+			data_subset = preds_vs_actual[preds_vs_actual['Prediction_split_name'] == pred_split_name].reset_index(drop=True)
+
+			value_names = set(list(data_subset['Value_name'])) if 'Value_name' in data_subset.columns else {'__n/a__'}
+			for value_name in value_names:
+				sub = data_subset if value_name == '__n/a__' else data_subset[data_subset['Value_name'] == value_name].reset_index(drop=True)
+				if len(sub) == 0:
+					continue
+
+				analyzed_path = path_to_preds + split_name + '/cv_' + str(i) + '/results/' + pred_split_name
+				if value_name != '__n/a__':
+					analyzed_path = analyzed_path + '/' + str(value_name)
 				path_if_none(analyzed_path)
-				# print(data_subset['Goal'])
-				# goal = data_subset['Goal'][0]
-				# all_goals.append(goal)
-				kept_dtypes.append(dtype)
-				analyzed_data = pd.DataFrame({'smiles':data_subset.smiles})
-				actual = data_subset['quantified_delivery']
-				pred = data_subset['cv_'+str(i)+'_pred_quantified_delivery']
-				# std_pred = data_subset['Std_pred_'+dtype]
-				# rse = data_subset['RSE_'+dtype]
-				# analyzed_data[dtype] = actual
-				# analyzed_data['Prediction'] = pred
-				# analyzed_data['Actual'] = actual
-				# analyzed_data['RSE_pred_'+dtype] = rse
-				# residuals = [actual[blah]-pred[blah] for blah in range(len(pred))]
-				# analyzed_data['Residual'] = residuals
-				if len(actual)>=min_values_for_analysis:
-					pearson = scipy.stats.pearsonr(actual, pred)
-					spearman, pval = scipy.stats.spearmanr(actual, pred)
-					kendall, pval = scipy.stats.kendalltau(actual, pred)
-					
-					# error_pearson = scipy.stats.pearsonr(std_pred,rse)
-					# all_names[pred_split_name].append(pred_split_name)
-					# all_dtypes.append(dtype)
-					rmse = np.sqrt(mean_squared_error(actual, pred))
-					all_rmse[pred_split_name] = all_rmse[pred_split_name] + [rmse]
-					
-					all_pearson[pred_split_name] = all_pearson[pred_split_name] + [pearson[0]]
-					all_pearson_p_val[pred_split_name] = all_pearson_p_val[pred_split_name] + [pearson[1]]
-					all_kendall[pred_split_name] = all_kendall[pred_split_name] + [kendall]
-					all_spearman[pred_split_name] = all_spearman[pred_split_name] + [spearman]
-					# all_pearson_p_val[pred_split_name].append(pearson[1])
-					# all_kendall[pred_split_name].append(kendall)
-					# all_spearman[pred_split_name].append(spearman)
-					plt.figure()
-					plt.scatter(pred,actual,color = 'black')
-					plt.plot(np.unique(pred),np.poly1d(np.polyfit(pred, actual, 1))(np.unique(pred)))
-					plt.xlabel('Predicted '+value_name)
-					plt.ylabel('Experimental '+value_name)
-					plt.savefig(analyzed_path+'/pred_vs_actual.png')
-					plt.close()
-				else:
-					all_rmse[pred_split_name] = all_rmse[pred_split_name] + [float('nan')]
-					all_pearson[pred_split_name] = all_pearson[pred_split_name] + [float('nan')]
-					all_pearson_p_val[pred_split_name] = all_pearson_p_val[pred_split_name] + [float('nan')]
-					all_kendall[pred_split_name] = all_kendall[pred_split_name] + [float('nan')]
-					all_spearman[pred_split_name] = all_spearman[pred_split_name] + [float('nan')]
 
-				all_ns[pred_split_name] = all_ns[pred_split_name] + [len(pred)]
+				for c in data_types:
+					if not c.startswith(f'cv_{i}_pred_'):
+						continue
+					task = c.replace(f'cv_{i}_pred_', '', 1)
+					if task not in sub.columns:
+						continue
 
-				analyzed_data.to_csv(analyzed_path+'/pred_vs_actual_data.csv', index = False)
-	crossval_results_path = path_to_preds+split_name+'/crossval_performance'
+					actual = pd.to_numeric(sub[task], errors='coerce')
+					pred = pd.to_numeric(sub[c], errors='coerce')
+					mask = np.isfinite(actual) & np.isfinite(pred)
+					n = int(mask.sum())
+					all_ns[pred_split_name] = all_ns[pred_split_name] + [n]
+
+					if n >= min_values_for_analysis:
+						u = set(np.unique(actual[mask]))
+						is_binary = u.issubset({0.0, 1.0})
+						if is_binary:
+							try:
+								pearson = scipy.stats.pearsonr(actual[mask], pred[mask])
+							except Exception:
+								pearson = (float('nan'), float('nan'))
+							try:
+								spearman, pval_s = scipy.stats.spearmanr(actual[mask], pred[mask])
+							except Exception:
+								spearman, pval_s = float('nan'), float('nan')
+							try:
+								kendall, pval_k = scipy.stats.kendalltau(actual[mask], pred[mask])
+							except Exception:
+								kendall, pval_k = float('nan'), float('nan')
+							try:
+								rmse = float(np.sqrt(mean_squared_error(actual[mask], pred[mask])))
+							except Exception:
+								rmse = float('nan')
+
+							all_pearson[pred_split_name] = all_pearson[pred_split_name] + [float(pearson[0])]
+							all_pearson_p_val[pred_split_name] = all_pearson_p_val[pred_split_name] + [float(pearson[1])]
+							all_kendall[pred_split_name] = all_kendall[pred_split_name] + [float(kendall)]
+							all_spearman[pred_split_name] = all_spearman[pred_split_name] + [float(spearman)]
+							all_rmse[pred_split_name] = all_rmse[pred_split_name] + [rmse]
+						else:
+							try:
+								pearson = scipy.stats.pearsonr(actual[mask], pred[mask])
+							except Exception:
+								pearson = (float('nan'), float('nan'))
+							try:
+								spearman, pval_s = scipy.stats.spearmanr(actual[mask], pred[mask])
+							except Exception:
+								spearman, pval_s = float('nan'), float('nan')
+							try:
+								kendall, pval_k = scipy.stats.kendalltau(actual[mask], pred[mask])
+							except Exception:
+								kendall, pval_k = float('nan'), float('nan')
+							try:
+								rmse = float(np.sqrt(mean_squared_error(actual[mask], pred[mask])))
+							except Exception:
+								rmse = float('nan')
+
+							all_pearson[pred_split_name] = all_pearson[pred_split_name] + [float(pearson[0])]
+							all_pearson_p_val[pred_split_name] = all_pearson_p_val[pred_split_name] + [float(pearson[1])]
+							all_kendall[pred_split_name] = all_kendall[pred_split_name] + [float(kendall)]
+							all_spearman[pred_split_name] = all_spearman[pred_split_name] + [float(spearman)]
+							all_rmse[pred_split_name] = all_rmse[pred_split_name] + [rmse]
+					else:
+						all_pearson[pred_split_name] = all_pearson[pred_split_name] + [float('nan')]
+						all_pearson_p_val[pred_split_name] = all_pearson_p_val[pred_split_name] + [float('nan')]
+						all_kendall[pred_split_name] = all_kendall[pred_split_name] + [float('nan')]
+						all_spearman[pred_split_name] = all_spearman[pred_split_name] + [float('nan')]
+						all_rmse[pred_split_name] = all_rmse[pred_split_name] + [float('nan')]
+
+	crossval_results_path = path_to_preds + split_name + '/crossval_performance'
 	path_if_none(crossval_results_path)
 
+	def _pad_dict(d):
+		maxn = max((len(v) for v in d.values()), default=0)
+		out = {}
+		for k, v in d.items():
+			vv = list(v)
+			if len(vv) < maxn:
+				vv = vv + [np.nan] * (maxn - len(vv))
+			out[k] = vv
+		return out
 
-	pd.DataFrame.from_dict(all_ns).to_csv(crossval_results_path+'/n_vals.csv', index = True)
-	pd.DataFrame.from_dict(all_pearson).to_csv(crossval_results_path+'/pearson.csv', index = True)
-	pd.DataFrame.from_dict(all_pearson_p_val).to_csv(crossval_results_path+'/pearson_p_val.csv', index = True)
-	pd.DataFrame.from_dict(all_kendall).to_csv(crossval_results_path+'/kendall.csv', index = True)
-	pd.DataFrame.from_dict(all_spearman).to_csv(crossval_results_path+'/spearman.csv', index = True)
-	pd.DataFrame.from_dict(all_rmse).to_csv(crossval_results_path+'/rmse.csv', index = True)
-
-
+	if len(all_ns) > 0:
+		pd.DataFrame(_pad_dict(all_ns)).to_csv(crossval_results_path + '/n_vals.csv', index=True)
+	if len(all_pearson) > 0:
+		pd.DataFrame(_pad_dict(all_pearson)).to_csv(crossval_results_path + '/pearson.csv', index=True)
+	if len(all_pearson_p_val) > 0:
+		pd.DataFrame(_pad_dict(all_pearson_p_val)).to_csv(crossval_results_path + '/pearson_p_val.csv', index=True)
+	if len(all_kendall) > 0:
+		pd.DataFrame(_pad_dict(all_kendall)).to_csv(crossval_results_path + '/kendall.csv', index=True)
+	if len(all_spearman) > 0:
+		pd.DataFrame(_pad_dict(all_spearman)).to_csv(crossval_results_path + '/spearman.csv', index=True)
+	if len(all_rmse) > 0:
+		pd.DataFrame(_pad_dict(all_rmse)).to_csv(crossval_results_path + '/rmse.csv', index=True)
 	# Now analyze the ultra-held-out set
 	try:
 		preds_vs_actual = pd.read_csv(path_to_preds+split_name+'/ultra_held_out/predicted_vs_actual.csv')
@@ -1512,8 +1780,6 @@ def analyze_predictions_cv(split_name,pred_split_variables = ['Experiment_ID','L
 		uho_results.to_csv(uho_results_path+'/ultra_held_out_results.csv', index = False)
 	except:
 		pass
-
-
 
 def make_predictions(path_to_folders = '../data/Splits', path_to_new_test = '', ensemble_number = -1):
 	predict_folder = path_to_folders + '/trained_model/Predictions'

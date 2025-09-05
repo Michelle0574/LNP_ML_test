@@ -1,0 +1,18 @@
+﻿Data_types_for_component,Values,Data_type_for_split,Train_or_split
+Experiment_ID,Whitehead_siRNA,smiles,split
+Experiment_ID,LM_3CR,smiles,split
+"Library_ID,Delivery_target","RM_carbonate, generic_cell",smiles,split
+"Experiment_ID,Library_ID","A549_form_screen,IR_Reductive_amination",smiles,split
+"Experiment_ID,Library_ID","A549_form_screen,other",smiles,train
+Experiment_ID,Luke_Raj_133_3_form,Random_id,train
+Library_ID,RM_Michael_addition_branched,smiles,split
+Experiment_ID,IR_BL_AG_4CR,smiles,split
+Experiment_ID,IR_BL_AG_3CR_sting,smiles,split
+Experiment_ID,Akinc_Michael_addition,smiles,split
+Experiment_ID,Li_Thiolyne,smiles,split
+Experiment_ID,Liu_Phospholipids,smiles,split
+Experiment_ID,Miller_zwitter_lipids,smiles,train
+Experiment_ID,Zhou_dendrimer,smiles,split
+Experiment_ID,Lee_unsat_dendrimer,smiles,train
+Library_ID,4CR_Ketone,smiles,train
+Experiment_ID,Chinese_Academy_of_Sciences,smiles,split
