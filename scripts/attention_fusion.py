@@ -7,7 +7,7 @@ import numpy as np
 if not hasattr(np, 'float'): np.float = float
 if not hasattr(np, 'int'):   np.int = int
 if not hasattr(np, 'bool'):  np.bool = bool
-
+import matplotlib.pyplot as plt
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.info')
 RDLogger.DisableLog('rdApp.warning')
@@ -23,6 +23,58 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, MACCSkeys
 from smiles_features import load_smiles_features_npz, _calc_one
 from sklearn.metrics import roc_auc_score, average_precision_score
+
+def _shp(x):
+	return list(x.shape) if isinstance(x, torch.Tensor) else str(type(x))
+
+def _shape_hook(name):
+	def _h(m, inp, out):
+		try:
+			if isinstance(out, tuple):
+				msg = f"[{name}] in={[ _shp(t) for t in inp ]} out={[ _shp(t) for t in out ]}"
+			else:
+				msg = f"[{name}] in={[ _shp(t) for t in inp ]} out={_shp(out)}"
+			tqdm.write(msg)
+		except Exception:
+			pass
+	return _h
+
+def register_shape_hooks(model: nn.Module):
+	hs = []
+	# group encoders
+	hs.append(model.comp_enc.register_forward_hook(_shape_hook("comp_enc")))
+	hs.append(model.help_enc.register_forward_hook(_shape_hook("help_enc")))
+	hs.append(model.exp_enc.register_forward_hook(_shape_hook("exp_enc")))
+	hs.append(model.phys_enc.register_forward_hook(_shape_hook("phys_enc")))
+	# self-attn（仅当 per_dim 模式有 blocks）
+	for enc_name, enc in [("comp", model.comp_enc), ("help", model.help_enc), ("exp", model.exp_enc), ("phys", model.phys_enc)]:
+		if getattr(enc, "blocks", None) is not None:
+			for i, blk in enumerate(enc.blocks):
+				hs.append(blk.attn.register_forward_hook(_shape_hook(f"{enc_name}.self_attn[{i}]")))
+	# cross-attn stack + FF
+	for i, cr in enumerate(model.cross):
+		hs.append(cr.attn.register_forward_hook(_shape_hook(f"cross_attn[{i}]")))
+		hs.append(cr.ff.register_forward_hook(_shape_hook(f"cross_ff[{i}]")))
+	# heads
+	hs.append(model.head_reg.register_forward_hook(_shape_hook("head_reg")))
+	if model.head_clf is not None:
+		hs.append(model.head_clf.register_forward_hook(_shape_hook("head_clf")))
+	return hs
+
+def remove_hooks(hooks):
+	for h in hooks:
+		try: h.remove()
+		except Exception: pass
+
+def save_attn_heatmap(A: np.ndarray, out_png: str, title: str):
+	plt.figure(figsize=(5,4))
+	plt.imshow(A, cmap="viridis", aspect="auto")
+	plt.colorbar()
+	plt.title(title)
+	plt.tight_layout()
+	os.makedirs(os.path.dirname(out_png), exist_ok=True)
+	plt.savefig(out_png, dpi=200)
+	plt.close()
 
 def _device_of(t: torch.Tensor) -> torch.device:
 	return t.device if isinstance(t, torch.Tensor) else torch.device('cpu')
@@ -172,12 +224,20 @@ class GroupEncoder(nn.Module):
 
 	def forward(self, x: torch.Tensor, mask: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, torch.Tensor]:
 		if self.tokens_mode == 'vector':
-			tok = self.proj(x).unsqueeze(1)   # [B,1,D]
+			tok = self.proj(torch.nan_to_num(x, nan=0.0)).unsqueeze(1)   # [B,1,D]
 			h = tok
-			g = h.mean(dim=1)
+			g = h.mean(dim=1)  # [B,D]
+			if mask is not None and mask.numel() > 0:
+				# mask: [B, Din]; if all-dim missing -> zero out group token
+				valid = (mask.sum(dim=1) > 0).float().unsqueeze(1)  # [B,1]
+				g = g * valid
+				h = h * valid.unsqueeze(1)
 			return h, g
 		else:
+			# sanitize per-dim inputs to avoid NaNs in attention
+			x = torch.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0)
 			tok = self.proj(x.unsqueeze(-1))  # [B,T,D]
+			tok = torch.nan_to_num(tok, nan=0.0, posinf=0.0, neginf=0.0)
 			if mask is not None:
 				tok = tok * mask.unsqueeze(-1).clamp(min=0.0, max=1.0)
 			h = tok
@@ -249,7 +309,7 @@ class AttentionFusionModel(nn.Module):
 			)
 
 	def forward(self, smiles: List[str], comp_x: torch.Tensor, helper_x: torch.Tensor,
-		exp_x: torch.Tensor, phys_x: torch.Tensor, phys_mask: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
+		exp_x: torch.Tensor, phys_x: torch.Tensor, comp_mask: Optional[torch.Tensor] = None, phys_mask: Optional[torch.Tensor] = None) -> Tuple[torch.Tensor, Optional[torch.Tensor]]:
 		B = comp_x.size(0)
 		device = comp_x.device
 
@@ -260,7 +320,7 @@ class AttentionFusionModel(nn.Module):
 		chem_tokens = torch.cat(chem_tokens, dim=0)
 		chem_tokens = self.chem_pe(chem_tokens)
 
-		comp_h, comp_g = self.comp_enc(comp_x)
+		comp_h, comp_g = self.comp_enc(comp_x, mask=comp_mask)
 		help_h, help_g = self.help_enc(helper_x)
 		exp_h,  exp_g  = self.exp_enc(exp_x)
 		phys_h, phys_g = self.phys_enc(phys_x, mask=phys_mask)
@@ -283,31 +343,40 @@ def _read_set(base_dir: str, prefix: str) -> Tuple[pd.DataFrame, pd.DataFrame, p
 	m = pd.read_csv(os.path.join(base_dir, f'{prefix}_metadata.csv'))
 	return y, x, m
 
-def _select_columns(df: pd.DataFrame, names: List[str]) -> np.ndarray:
-	cols = [c for c in names if c in df.columns]
-	if len(cols) == 0:
-		return np.zeros((len(df), 0), dtype=np.float32)
-	return df[cols].apply(pd.to_numeric, errors='coerce').fillna(0.0).to_numpy(np.float32)
+def _select_columns(df: pd.DataFrame, names) -> np.ndarray:
+    cols = [c for c in names if c in df.columns]
+    if len(cols) == 0:
+        return np.zeros((len(df), 0), dtype=np.float32)
+    arr = df[cols].apply(pd.to_numeric, errors='coerce').to_numpy(np.float32)  # 保留 NaN
+    return arr
 
-def _select_prefix(df: pd.DataFrame, prefixes: List[str]) -> np.ndarray:
-	cols = [c for c in df.columns for p in prefixes if c.startswith(p)]
-	cols = sorted(list(set(cols)))
-	if len(cols) == 0:
-		return np.zeros((len(df), 0), dtype=np.float32)
-	return df[cols].apply(pd.to_numeric, errors='coerce').fillna(0.0).to_numpy(np.float32)
+def _select_prefix(df: pd.DataFrame, prefixes) -> np.ndarray:
+    cols = [c for c in df.columns for p in prefixes if c.startswith(p)]
+    cols = sorted(list(set(cols)))
+    if len(cols) == 0:
+        return np.zeros((len(df), 0), dtype=np.float32)
+    arr = df[cols].apply(pd.to_numeric, errors='coerce').to_numpy(np.float32)  # 保留 NaN
+    return arr
 
-def _standardize_fit(x: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-	if x.shape[1] == 0:
-		return np.zeros((0,), dtype=np.float32), np.ones((0,), dtype=np.float32)
-	mean = np.nanmean(x, axis=0).astype(np.float32)
-	std  = np.nanstd(x, axis=0).astype(np.float32)
-	std[std == 0] = 1.0
-	return mean, std
+def _build_mask_from_raw(df: pd.DataFrame, cols) -> np.ndarray:
+    if len(cols) == 0:
+        return np.zeros((len(df), 0), dtype=np.float32)
+    raw = df[cols].apply(pd.to_numeric, errors='coerce').to_numpy(np.float32)
+    mask = np.isfinite(raw)
+    return mask.astype(np.float32)
 
-def _standardize_apply(x: np.ndarray, mean: np.ndarray, std: np.ndarray) -> np.ndarray:
-	if x.shape[1] == 0:
-		return x
-	return (x - mean) / std
+def _standardize_fit(x: np.ndarray):
+	mu = np.nanmean(x, axis=0).astype(np.float32)
+	sd = np.nanstd(x, axis=0).astype(np.float32)
+	# replace NaNs and zeros
+	mu = np.nan_to_num(mu, nan=0.0)
+	sd = np.nan_to_num(sd, nan=1.0)
+	sd[sd == 0] = 1.0
+	return mu, sd
+
+def _standardize_apply(x: np.ndarray, mu: np.ndarray, sd: np.ndarray):
+    z = (x - mu) / sd
+    return z
 
 def build_inputs_from_split(cv_dir: str) -> Dict[str, any]:
 	"""
@@ -336,7 +405,9 @@ def build_inputs_from_split(cv_dir: str) -> Dict[str, any]:
 	# compute target normalization on train
 	tr_y_mat = tr_y[reg_cols].apply(pd.to_numeric, errors='coerce').to_numpy(np.float32)
 	y_mean = np.nanmean(tr_y_mat, axis=0).astype(np.float32)
-	y_std  = np.nanstd(tr_y_mat, axis=0).astype(np.float32)
+	y_std  = np.nanstd(tr_y_mat,  axis=0).astype(np.float32)
+	y_mean = np.nan_to_num(y_mean, nan=0.0)
+	y_std  = np.nan_to_num(y_std,  nan=1.0)
 	y_std[y_std < 1e-6] = 1.0
 
 	# groups
@@ -400,26 +471,24 @@ def build_inputs_from_split(cv_dir: str) -> Dict[str, any]:
 	va_s, va_comp, va_help, va_exp, va_phys, va_yv, va_yc_np = group_xy(va_y, va_x, va_m, va_yc)
 	te_s, te_comp, te_help, te_exp, te_phys, te_yv, te_yc_np = group_xy(te_y, te_x, te_m, te_yc)
 
-	# standardize numeric groups on train
+	tr_comp_mask = _build_mask_from_raw(pd.concat([tr_x, tr_m], axis=1), present_comp)
+	va_comp_mask = _build_mask_from_raw(pd.concat([va_x, va_m], axis=1), present_comp)
+	te_comp_mask = _build_mask_from_raw(pd.concat([te_x, te_m], axis=1), present_comp)
+
+	tr_phys_mask = _build_mask_from_raw(pd.concat([tr_x, tr_m], axis=1), present_phys)
+	va_phys_mask = _build_mask_from_raw(pd.concat([va_x, va_m], axis=1), present_phys)
+	te_phys_mask = _build_mask_from_raw(pd.concat([te_x, te_m], axis=1), present_phys)
+
+	# standardize numeric groups on train (ignore NaN)
 	comp_mean, comp_std = _standardize_fit(tr_comp)
-	phys_mean, phys_std = _standardize_fit(tr_phys)
 	tr_comp = _standardize_apply(tr_comp, comp_mean, comp_std)
 	va_comp = _standardize_apply(va_comp, comp_mean, comp_std)
 	te_comp = _standardize_apply(te_comp, comp_mean, comp_std)
+
+	phys_mean, phys_std = _standardize_fit(tr_phys)
 	tr_phys = _standardize_apply(tr_phys, phys_mean, phys_std)
 	va_phys = _standardize_apply(va_phys, phys_mean, phys_std)
 	te_phys = _standardize_apply(te_phys, phys_mean, phys_std)
-
-	# build phys mask on raw values: 1 = valid(non-NaN & non-zero), 0 = missing/zero
-	def _build_phys_mask(df: pd.DataFrame, cols: List[str]) -> np.ndarray:
-		if len(cols) == 0: return np.zeros((len(df), 0), dtype=np.float32)
-		raw = df[cols].apply(pd.to_numeric, errors='coerce').to_numpy(np.float32)
-		mask = (~np.isnan(raw)) & (np.abs(raw) > 0)
-		return mask.astype(np.float32)
-
-	tr_phys_mask = _build_phys_mask(pd.concat([tr_x, tr_m], axis=1), phys_cols)
-	va_phys_mask = _build_phys_mask(pd.concat([va_x, va_m], axis=1), phys_cols)
-	te_phys_mask = _build_phys_mask(pd.concat([te_x, te_m], axis=1), phys_cols)
 
 	meta = {
 		'reg_cols': reg_cols, 'clf_cols': clf_cols,
@@ -429,21 +498,22 @@ def build_inputs_from_split(cv_dir: str) -> Dict[str, any]:
 		'phys_mean': phys_mean, 'phys_std': phys_std,
 		'y_mean': y_mean, 'y_std': y_std
 	}
-	def pack(smiles, comp, helpv, expc, phys, phys_mask, y, yc):
+	def pack(smiles, comp, helpv, expc, phys, comp_mask, phys_mask, y, yc):
 		return {
 			'smiles': smiles,
 			'comp': torch.from_numpy(comp),
 			'help': torch.from_numpy(helpv),
-			'exp': torch.from_numpy(expc),
+			'exp':  torch.from_numpy(expc),
 			'phys': torch.from_numpy(phys),
+			'comp_mask': torch.from_numpy(comp_mask),
 			'phys_mask': torch.from_numpy(phys_mask),
-			'y': torch.from_numpy(y),
-			'y_clf': torch.from_numpy(yc)
+			'y':    torch.from_numpy(y),
+			'y_clf':torch.from_numpy(yc),
 		}
 	return {
-		'train': pack(tr_s, tr_comp, tr_help, tr_exp, tr_phys, tr_phys_mask, tr_yv, tr_yc_np),
-		'valid': pack(va_s, va_comp, va_help, va_exp, va_phys, va_phys_mask, va_yv, va_yc_np),
-		'test':  pack(te_s, te_comp, te_help, te_exp, te_phys, te_phys_mask, te_yv, te_yc_np),
+		'train': pack(tr_s, tr_comp, tr_help, tr_exp, tr_phys, tr_comp_mask, tr_phys_mask, tr_yv, tr_yc_np),
+		'valid': pack(va_s, va_comp, va_help, va_exp, va_phys, va_comp_mask, va_phys_mask, va_yv, va_yc_np),
+		'test':  pack(te_s, te_comp, te_help, te_exp, te_phys, te_comp_mask, te_phys_mask, te_yv, te_yc_np),
 		'meta': meta
 	}
 
@@ -461,6 +531,8 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 	cv_dir = os.path.join(base, 'data', 'crossval_splits', split_folder, f'cv_{cv_index}')
 	out_dir = os.path.join(cv_dir + '_attn')
 	os.makedirs(out_dir, exist_ok=True)
+	debug_dir = os.path.join(out_dir, "debug_attn")
+	os.makedirs(debug_dir, exist_ok=True)
 
 	# load config (defaults + overrides)
 	default_cfg_path = os.path.join(base, 'data', 'args_files', 'attention_config.json')
@@ -483,6 +555,21 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 		cross_layers=int(cfg.get('cross_layers', 2))
 	).to(device)
 
+	hooks = register_shape_hooks(model)
+
+	with torch.no_grad():
+		_ = model(
+			bundle['valid']['smiles'],
+			bundle['valid']['comp'].to(device),
+			bundle['valid']['help'].to(device),
+			bundle['valid']['exp'].to(device),
+			bundle['valid']['phys'].to(device),
+			comp_mask=bundle['valid']['comp_mask'].to(device),
+			phys_mask=bundle['valid']['phys_mask'].to(device)
+		)
+
+	remove_hooks(hooks)
+
 	opt = torch.optim.AdamW(model.parameters(), lr=float(cfg.get('lr', 1e-4)), weight_decay=float(cfg.get('weight_decay', 1e-4)))
 
 	lambda_clf = float(cfg.get('lambda_clf', 0.5))
@@ -490,9 +577,10 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 	pos_w = None
 	if bundle['train']['y_clf'].shape[1] > 0:
 		yc_np = bundle['train']['y_clf'].detach().cpu().numpy()
-		tot = yc_np.shape[0]
-		pos = np.nan_to_num(yc_np, nan=0.0).sum(axis=0).astype(np.float32)
-		neg = (tot - pos).clip(min=1.0)
+		is_fin = np.isfinite(yc_np)
+		pos = np.nansum((yc_np == 1) & is_fin, axis=0).astype(np.float32)
+		tot = np.sum(is_fin, axis=0).astype(np.float32)
+		neg = np.clip(tot - pos, 1.0, None)
 		pos = np.clip(pos, 1.0, None)
 		pos_w = torch.from_numpy(neg / pos).to(device)
 
@@ -518,13 +606,14 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 			'help': batch['help'].to(device),
 			'exp': batch['exp'].to(device),
 			'phys': batch['phys'].to(device),
+			'comp_mask': batch['comp_mask'].to(device),
 			'phys_mask': batch['phys_mask'].to(device),
 			'y': batch['y'].to(device),
 			'y_clf': batch['y_clf'].to(device)
 		}
 
 	tr, va = _to_device(bundle['train']), _to_device(bundle['valid'])
-	y_std_t = torch.tensor(meta['y_std'], dtype=torch.float32, device=device)
+	y_std_t = torch.tensor(np.nan_to_num(meta['y_std'], nan=1.0), dtype=torch.float32, device=device)
 	scale = torch.mean(y_std_t**2)
 
 	best_val = float('inf')
@@ -534,7 +623,9 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 	for ep in range(1, epochs + 1):
         # ---- train ----
 		model.train()
-		reg, clf = model(tr['smiles'], tr['comp'], tr['help'], tr['exp'], tr['phys'], tr.get('phys_mask', None))
+		reg, clf = model(tr['smiles'], tr['comp'], tr['help'], tr['exp'], tr['phys'],
+		                 comp_mask=tr.get('comp_mask', None),
+		                 phys_mask=tr.get('phys_mask', None))
 
 		# regression masked MSE
 		mask_r_tr = torch.isfinite(tr['y']).float()
@@ -556,7 +647,9 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
         # ---- valid ----
 		with torch.no_grad():
 			model.eval()
-			vreg, vclf = model(va['smiles'], va['comp'], va['help'], va['exp'], va['phys'], va.get('phys_mask', None))
+			vreg, vclf = model(va['smiles'], va['comp'], va['help'], va['exp'], va['phys'],
+			                   comp_mask=va.get('comp_mask', None),
+			                   phys_mask=va.get('phys_mask', None))
 
 			# masked val loss
 			mask_r_va = torch.isfinite(va['y']).float()
@@ -638,21 +731,17 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 			if bool(cfg.get('debug_attn', False)):
 				# Cross-attn summary
 				if len(model.cross) > 0 and model.cross[-1].last_attn is not None:
-					aw = model.cross[-1].last_attn    # [B,H,Tq,Ts]
-					A = aw[0].mean(0)                  # [Tq,Ts]
-					ts_chem = 3
-					ts_phys = A.size(1) - ts_chem
-					chem_pct = A[:, :ts_chem].sum().item() / A.sum().item()
-					phys_pct = A[:, ts_chem:].sum().item() / A.sum().item()
-					desc = A[:, 0].mean().item(); morgan = A[:, 1].mean().item(); maccs = A[:, 2].mean().item()
-					tqdm.write(f"[attn][cv{cv_index}] tgt->chem={chem_pct:.3f} tgt->phys={phys_pct:.3f} | chem(desc/morgan/maccs)={desc:.3f}/{morgan:.3f}/{maccs:.3f}")
-				# Self-attn (per-dim) summaries
+					aw = model.cross[-1].last_attn            # [B,H,Tq,Ts]
+					A = aw[0].mean(0).detach().cpu().numpy()  # [Tq,Ts]
+					save_attn_heatmap(A, os.path.join(debug_dir, f"cross_ep{ep}.png"),
+									title=f"Cross-attn epoch {ep} (Tq x Ts)")
+
+				# Self-attn（各 group 若是 per_dim 模式才有）
 				for name, enc in [('comp', model.comp_enc), ('exp', model.exp_enc), ('phys', model.phys_enc), ('help', model.help_enc)]:
-					if hasattr(enc, 'last_attn') and enc.last_attn is not None:
-						S = enc.last_attn[0].mean(0)  # [T,T]
-						diag = S.diag().mean().item()
-						off = ((S.sum() - S.diag().sum()) / max(S.numel() - S.size(0), 1)).item()
-						tqdm.write(f"[self-attn][{name}] T={S.size(0)} diag={diag:.3f} off={off:.3f}")
+					if getattr(enc, 'last_attn', None) is not None:
+						S = enc.last_attn[0].mean(0).detach().cpu().numpy()  # [T, T]
+						save_attn_heatmap(S, os.path.join(debug_dir, f"{name}_self_ep{ep}.png"),
+										title=f"{name} self-attn epoch {ep} (T x T)")
 		except Exception:
 			pass
 	pbar.close()
@@ -715,7 +804,8 @@ def predict_cv(split_folder: str, cv_index: int, npz_path: str, out_csv: Optiona
 			bundle['test']['help'].to(device),
 			bundle['test']['exp'].to(device),
 			bundle['test']['phys'].to(device),
-			bundle['test']['phys_mask'].to(device)
+			comp_mask=bundle['test']['comp_mask'].to(device),
+			phys_mask=bundle['test']['phys_mask'].to(device)
 		)
 		reg_np = reg.cpu().numpy()
 		clf_np = clf.cpu().numpy() if clf is not None and len(clf_cols)>0 else None

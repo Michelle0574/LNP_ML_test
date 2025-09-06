@@ -4,8 +4,11 @@
     "enc_layers": 2,
     "cross_layers": 2,
     "per_dim_tokens_thresh": 64,
-    "lr": 3e-4,
-    "weight_decay": 1e-5,
-    "lambda_clf": 0.5,
+    "lr": 2e-4,
+    "weight_decay": 1e-4,
+    "lambda_clf": 0.1,
+    "patience": 6,
+    "clf_warmup_epochs": 5,
+    "clf_ramp_epochs": 5,
     "debug_attn": true
   }

@@ -903,8 +903,13 @@ def make_pred_vs_actual(split_folder, ensemble_size = 5, predictions_done = [], 
 		chemprop.train.make_predictions(args=args)
 		current_predictions = pd.read_csv(data_dir+'/preds.csv')
 		current_predictions.drop(columns = ['smiles'], inplace = True)
+
+		# Keep a copy of raw predictions for metrics on the true label scale
+		raw_current_predictions = current_predictions.copy()  # <-- added
+
 		for col in current_predictions.columns:
 			if standardize_predictions:
+				# Standardize only for exported predictions (not for RMSE)
 				preds_to_standardize = current_predictions[col]
 				std = np.std(preds_to_standardize); mean = np.mean(preds_to_standardize)
 				current_predictions[col] = [(val-mean)/std for val in current_predictions[col]]
@@ -926,6 +931,8 @@ def make_pred_vs_actual(split_folder, ensemble_size = 5, predictions_done = [], 
 			chemprop.train.make_predictions(args=args)
 			clf_predictions = pd.read_csv(data_dir+'/preds_clf.csv')
 			clf_predictions.drop(columns = ['smiles'], inplace = True)
+			# (Optional) keep a raw copy if you later want classification metrics on raw scale
+			raw_clf_predictions = clf_predictions.copy()  # <-- optional (kept for symmetry)
 			for col in clf_predictions.columns:
 				if standardize_predictions:
 					preds_to_standardize = clf_predictions[col]
@@ -948,12 +955,14 @@ def make_pred_vs_actual(split_folder, ensemble_size = 5, predictions_done = [], 
 				te = pd.read_csv(test_csv)
 				rmse_rows = []
 				for c in [x for x in te.columns if x.lower() != 'smiles']:
+					# True labels (unscaled)
 					y_true = pd.to_numeric(te[c], errors='coerce').to_numpy()
-					pred_col = f'cv_{cv}_pred_{c}'
-					if pred_col in output.columns:
-						y_pred = pd.to_numeric(output[pred_col], errors='coerce').to_numpy()
+					# Use raw (unstandardized) predictions for RMSE on true label scale
+					if c in raw_current_predictions.columns:
+						y_pred = pd.to_numeric(raw_current_predictions[c], errors='coerce').to_numpy()
 					else:
 						y_pred = np.full(len(te), np.nan, dtype=float)
+
 					m = np.isfinite(y_true) & np.isfinite(y_pred)
 					if m.sum() == 0:
 						rmse = float('nan')
