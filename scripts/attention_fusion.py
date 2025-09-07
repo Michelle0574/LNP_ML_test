@@ -23,6 +23,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem, MACCSkeys
 from smiles_features import load_smiles_features_npz, _calc_one
 from sklearn.metrics import roc_auc_score, average_precision_score
+from chemprop_encoder import ChempropEncoder
 
 def _shp(x):
 	return list(x.shape) if isinstance(x, torch.Tensor) else str(type(x))
@@ -168,6 +169,70 @@ class SmilesVectorizer(nn.Module):
 		tokens = tokens + self.type_emb(types)
 		return tokens
 
+class ChemistryEncoder(nn.Module):
+	"""
+	Produce chemistry tokens:
+	- RDKit tokens: desc/morgan/maccs -> 3 tokens (same as before)
+	- Optional D-MPNN token: chemprop graph embedding -> 1 token
+	chem_mode: 'rdkit' | 'mpnn' | 'rdkit+mpnn'
+	"""
+	def __init__(self, rdkit_npz_path: str, d_model: int = 128,
+	             chem_mode: str = 'rdkit', mpnn_ckpt: str = None,
+	             mpnn_cache_npz: str = None, freeze_mpnn: bool = True, device: str = 'cpu'):
+		super().__init__()
+		self.chem_mode = chem_mode
+		self.device = torch.device(device)
+		# Reuse your existing RDKit pipeline
+		self.rdkit = SmilesVectorizer(npz_path=rdkit_npz_path, d_model=d_model).to(self.device)
+		# Optional MPNN encoder
+		self.mpnn = None
+		self.proj_mpnn = None
+		if chem_mode in ('mpnn', 'rdkit+mpnn'):
+			assert mpnn_ckpt is not None and os.path.exists(mpnn_ckpt), "Missing chemprop checkpoint"
+			self.mpnn = ChempropEncoder(ckpt_path=mpnn_ckpt, device=device, cache_npz=mpnn_cache_npz, freeze=freeze_mpnn)
+			H = 300 if self.mpnn.H is None else self.mpnn.H
+			self.proj_mpnn = nn.Linear(H, d_model)
+		# type embedding: up to 4 token types
+		self.type_emb = nn.Embedding(4, d_model)
+		self.pe = PositionalEncoding(d_model)
+
+	def forward(self, smiles_list: List[str]) -> torch.Tensor:
+		"""
+		Return chemistry tokens of shape [B, Tchem, d_model]
+		Tchem = 3 for 'rdkit', 1 for 'mpnn', 4 for 'rdkit+mpnn'
+		"""
+		dev = self.device
+		rd_tokens = []
+		if self.chem_mode in ('rdkit', 'rdkit+mpnn'):
+			for s in smiles_list:
+				t = self.rdkit(s).to(dev)  # [3, d_model]
+				rd_tokens.append(t.unsqueeze(0))
+			rd = torch.cat(rd_tokens, dim=0)  # [B,3,d]
+		else:
+			rd = None
+
+		mp = None
+		if self.chem_mode in ('mpnn', 'rdkit+mpnn'):
+			Z = self.mpnn.encode(smiles_list)                 # [B,H]
+			mp = self.proj_mpnn(Z).unsqueeze(1)               # [B,1,d]
+			# add type embedding for mpnn token (index=3)
+			type_ids = torch.full((mp.size(0), 1), 3, dtype=torch.long, device=mp.device)
+			mp = mp + self.type_emb(type_ids)
+
+		if self.chem_mode == 'rdkit':
+			x = rd
+		elif self.chem_mode == 'mpnn':
+			x = mp
+		else:
+			x = torch.cat([rd, mp], dim=1)  # [B,4,d]
+			# add type embedding for RDKit tokens (0,1,2)
+			B, T, D = rd.shape
+			type_ids = torch.arange(0, 3, dtype=torch.long, device=rd.device).unsqueeze(0).expand(B, -1)
+			rd = rd + self.type_emb(type_ids)
+			x = torch.cat([rd, mp], dim=1)
+		x = self.pe(x)
+		return x
+
 class PositionalEncoding(nn.Module):
 	def __init__(self, d_model: int, max_len: int = 512):
 		super().__init__()
@@ -274,12 +339,12 @@ class CrossAttnBlock(nn.Module):
 		return h
 
 class AttentionFusionModel(nn.Module):
-	def __init__(self, d_model: int, n_reg: int, smiles_vec: SmilesVectorizer,
+	def __init__(self, d_model: int, n_reg: int, chem_encoder: ChemistryEncoder,
 				 comp_in: int, helper_in: int, exp_in: int, phys_in: int,
 				 n_clf: int = 0, per_dim_tokens_thresh: int = 64,
 				 nhead: int = 4, enc_layers: int = 1, cross_layers: int = 2):
 		super().__init__()
-		self.smiles_vec = smiles_vec
+		self.chem = chem_encoder
 		self.n_reg = n_reg
 		self.n_clf = n_clf
 		self.chem_pe = PositionalEncoding(d_model)
@@ -313,12 +378,7 @@ class AttentionFusionModel(nn.Module):
 		B = comp_x.size(0)
 		device = comp_x.device
 
-		chem_tokens = []
-		for s in smiles:
-			t = self.smiles_vec(s).to(device)
-			chem_tokens.append(t.unsqueeze(0))
-		chem_tokens = torch.cat(chem_tokens, dim=0)
-		chem_tokens = self.chem_pe(chem_tokens)
+		chem_tokens = self.chem(smiles)  # [B, Tchem, d_model]
 
 		comp_h, comp_g = self.comp_enc(comp_x, mask=comp_mask)
 		help_h, help_g = self.help_enc(helper_x)
@@ -537,15 +597,23 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 	# load config (defaults + overrides)
 	default_cfg_path = os.path.join(base, 'data', 'args_files', 'attention_config.json')
 	cfg = load_attention_config(cfg_path or default_cfg_path)
+	chem_mode = str(cfg.get('chem_mode', 'rdkit'))  # 'rdkit' | 'mpnn' | 'rdkit+mpnn'
+	mpnn_ckpt = cfg.get('mpnn_ckpt', None)
+	mpnn_cache = cfg.get('mpnn_cache_npz', None)
+	freeze_mpnn = bool(cfg.get('freeze_mpnn', True))
 
 	bundle = build_inputs_from_split(cv_dir)
 	meta = bundle['meta']
 	reg_cols = meta['reg_cols']; clf_cols = meta['clf_cols']
 
 	d_model = int(cfg.get('d_model', d_model))
-	smiles_vec = SmilesVectorizer(npz_path=npz_path, d_model=d_model).to(device)
+	chem = ChemistryEncoder(
+		rdkit_npz_path=npz_path, d_model=d_model,
+		chem_mode=chem_mode, mpnn_ckpt=mpnn_ckpt,
+		mpnn_cache_npz=mpnn_cache, freeze_mpnn=freeze_mpnn, device=device
+	).to(device)
 	model = AttentionFusionModel(
-		d_model=d_model, n_reg=len(reg_cols), smiles_vec=smiles_vec,
+		d_model=d_model, n_reg=len(reg_cols), chem_encoder=chem,
 		comp_in=meta['comp_in'], helper_in=meta['helper_in'],
 		exp_in=meta['exp_in'], phys_in=meta['phys_in'],
 		n_clf=len(clf_cols),
@@ -570,7 +638,48 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 
 	remove_hooks(hooks)
 
-	opt = torch.optim.AdamW(model.parameters(), lr=float(cfg.get('lr', 1e-4)), weight_decay=float(cfg.get('weight_decay', 1e-4)))
+	# build param groups (replace the old single-line opt)
+	param_groups = []
+	wd = float(cfg.get('weight_decay', 1e-4))
+	base_lr = float(cfg.get('lr', 1e-4))
+	mpnn_lr = float(cfg.get('mpnn_lr', 1e-5))  # smaller by default
+
+	def _add_params(named_params, lr, wd, require_grad_filter=True):
+		group = []
+		for n, p in named_params:
+			if not p.requires_grad and require_grad_filter: continue
+			decay = 0.0 if (p.ndim == 1 or 'bias' in n or 'norm' in n or 'ln' in n) else wd
+			group.append({'params': [p], 'lr': lr, 'weight_decay': decay})
+		return group
+
+	# main model (excluding mpnn)
+	main_named = [(n,p) for n,p in model.named_parameters() if not n.startswith('chem.mpnn')]
+	param_groups += _add_params(main_named, base_lr, wd)
+
+	# mpnn (only when not frozen)
+	if (chem_mode in ('mpnn','rdkit+mpnn')) and (not freeze_mpnn) and (hasattr(model.chem, 'mpnn') and model.chem.mpnn is not None):
+		mpnn_named = [(f"chem.mpnn.{n}",p) for n,p in model.chem.mpnn.named_parameters()]
+		for n,p in mpnn_named:
+			if p.requires_grad:
+				param_groups.append({'params':[p], 'lr': mpnn_lr, 'weight_decay': 0.0})
+
+	opt = torch.optim.AdamW(param_groups)
+
+	# ---- Warmup + Cosine scheduler (epoch-wise) ----
+	import math
+	warmup_epochs = int(cfg.get('warmup_epochs', max(1, epochs // 10)))
+	min_lr = float(cfg.get('min_lr', 1e-6))
+	def _lr_lambda(current_epoch: int):
+		# Warmup: linear ramp from 0 -> 1
+		if current_epoch < warmup_epochs:
+			return max(1e-8, float(current_epoch + 1) / float(max(1, warmup_epochs)))
+		# Cosine: from 1 -> (min_lr / base_lr)
+		t = current_epoch - warmup_epochs
+		T = max(1, epochs - warmup_epochs)
+		cos = 0.5 * (1.0 + math.cos(math.pi * t / T))
+		min_ratio = min_lr / max(1e-12, base_lr)
+		return float(min_ratio + (1.0 - min_ratio) * cos)
+	scheduler = torch.optim.lr_scheduler.LambdaLR(opt, lr_lambda=_lr_lambda)
 
 	lambda_clf = float(cfg.get('lambda_clf', 0.5))
 
@@ -619,6 +728,12 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 	best_val = float('inf')
 	best_epoch = -1
 
+	early_patience = int(cfg.get('early_stop_patience', 10))
+	early_min_delta = float(cfg.get('early_stop_min_delta', 1e-4))
+	no_improve = 0
+
+	grad_clip = float(cfg.get('grad_clip', 1.0))
+
 	pbar = tqdm(total=epochs, desc=f"[cv{cv_index}] epochs", leave=True)
 	for ep in range(1, epochs + 1):
         # ---- train ----
@@ -641,7 +756,7 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 			loss_clf = torch.tensor(0.0, device=device)
 		loss = loss_reg + lambda_clf * loss_clf
 		opt.zero_grad(); loss.backward()
-		torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+		torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=grad_clip)
 		opt.step()
 
         # ---- valid ----
@@ -690,6 +805,9 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 		rmse_tr = torch.sqrt(loss_reg * scale).item()
 		rmse_va = torch.sqrt(val_reg * scale).item()
 
+		# scheduler step per epoch
+		scheduler.step()
+
 		# ---- save last.pt every epoch ----
 		last_ckpt = {
 			'epoch': ep,
@@ -704,11 +822,14 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 		}
 		torch.save(last_ckpt, os.path.join(out_dir, 'last.pt'))
 
-		# ---- save best.pt when improved ----
-		if val_loss < best_val:
+		# ---- best checkpoint + early stopping ----
+		if val_loss < (best_val - early_min_delta):
 			best_val = val_loss
 			best_epoch = ep
+			no_improve = 0
 			torch.save(last_ckpt, os.path.join(out_dir, 'best.pt'))
+		else:
+			no_improve += 1
 
 		# one-line log per epoch
 		pbar.update(1)
@@ -717,8 +838,14 @@ def train_cv(split_folder: str, cv_index: int, npz_path: str, epochs: int = 20, 
 			f"loss={loss.item():.4f} va_loss={val_loss:.4f} | "
 			f"rmse={rmse_tr:.2f} va_rmse={rmse_va:.2f} | "
 			f"bce={loss_clf.item():.4f} va_bce={val_clf.item():.4f} | "
-			f"best@{best_epoch}={best_val:.4f}"
+			f"lr={opt.param_groups[0]['lr']:.2e} | "
+			f"best@{best_epoch}={best_val:.4f} | "
+			f"no_improve={no_improve}/{early_patience}"
 		)
+
+		if no_improve >= early_patience:
+			tqdm.write(f"[cv{cv_index}] Early stopping at epoch {ep} (best={best_val:.4f} @ {best_epoch})")
+			break
 
 		# print per-task tables (validation)
 		try:
@@ -771,9 +898,18 @@ def predict_cv(split_folder: str, cv_index: int, npz_path: str, out_csv: Optiona
 	y_mean = meta['y_mean']; y_std = meta['y_std']
 
 	d_model = int(cfg.get('d_model', 128))
-	smiles_vec = SmilesVectorizer(npz_path=npz_path, d_model=d_model).to(device)
+	chem_mode = str(cfg.get('chem_mode', 'rdkit'))
+	mpnn_ckpt = cfg.get('mpnn_ckpt', None)
+	mpnn_cache = cfg.get('mpnn_cache_npz', None)
+	freeze_mpnn = bool(cfg.get('freeze_mpnn', True))
+
+	chem = ChemistryEncoder(
+		rdkit_npz_path=npz_path, d_model=d_model,
+		chem_mode=chem_mode, mpnn_ckpt=mpnn_ckpt,
+		mpnn_cache_npz=mpnn_cache, freeze_mpnn=freeze_mpnn, device=device
+	).to(device)
 	model = AttentionFusionModel(
-		d_model=d_model, n_reg=len(reg_cols), smiles_vec=smiles_vec,
+		d_model=d_model, n_reg=len(reg_cols), chem_encoder=chem,
 		comp_in=meta['comp_in'], helper_in=meta['helper_in'],
 		exp_in=meta['exp_in'], phys_in=meta['phys_in'],
 		n_clf=len(clf_cols),
@@ -782,6 +918,7 @@ def predict_cv(split_folder: str, cv_index: int, npz_path: str, out_csv: Optiona
 		enc_layers=int(cfg.get('enc_layers', 1)),
 		cross_layers=int(cfg.get('cross_layers', 2))
 	).to(device)
+
 	ckpt = torch.load(os.path.join(attn_dir, 'model.pt'), map_location=device)
 	model.load_state_dict(ckpt['state_dict']); model.eval()
 
@@ -1029,9 +1166,33 @@ def predict_cv(split_folder: str, cv_index: int, npz_path: str, out_csv: Optiona
 				.to_csv(os.path.join(results_dir, 'test_scores.csv'), index=False)
 
 	return base_df
-		# scores_json = {
-		# 	'rmse': {r['Task']: r['Fold 0 rmse'] for _, r in (df_rmse.iterrows() if len(df_rmse)>0 else [])},
-		# 	'auc':  {r['Task']: r['Fold 0 auc']  for _, r in (df_auc.iterrows()  if len(df_auc)>0  else [])}
-		# }
-		# with open(os.path.join(results_dir, 'test_scores.json'), 'w', encoding='utf-8') as f:
-		# 	json.dump(scores_json, f, indent=2, ensure_ascii=False)
+
+
+import argparse
+
+if __name__ == '__main__':
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--mode', choices=['train','predict'], required=True)
+	parser.add_argument('--split', required=True)
+	parser.add_argument('--cv', type=int, required=True)
+	parser.add_argument('--config', type=str, default=None)
+	parser.add_argument('--device', type=str, default='cuda' if torch.cuda.is_available() else 'cpu')
+	parser.add_argument('--rdkit_npz', type=str,
+		default=os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'smiles_features.npz')))
+	parser.add_argument('--epochs', type=int, default=None)
+	parser.add_argument('--out_csv', type=str, default=None)
+	args = parser.parse_args()
+
+	cfg_path = args.config
+	cfg_loaded = load_attention_config(cfg_path) if cfg_path else {}
+	epochs = args.epochs if args.epochs is not None else int(cfg_loaded.get('epochs', 20))
+
+	if args.mode == 'train':
+		print(f"[RUN] train split={args.split} cv={args.cv} epochs={epochs}", flush=True)
+		train_cv(split_folder=args.split, cv_index=args.cv, npz_path=args.rdkit_npz,
+		         epochs=epochs, d_model=int(cfg_loaded.get('d_model', 128)),
+		         device=args.device, cfg_path=cfg_path)
+	else:
+		print(f"[RUN] predict split={args.split} cv={args.cv}", flush=True)
+		predict_cv(split_folder=args.split, cv_index=args.cv, npz_path=args.rdkit_npz,
+		           out_csv=args.out_csv, device=args.device, cfg_path=cfg_path)

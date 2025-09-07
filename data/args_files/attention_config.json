@@ -1,14 +1,17 @@
 {
-    "d_model": 128,
-    "nhead": 4,
-    "enc_layers": 2,
-    "cross_layers": 2,
-    "per_dim_tokens_thresh": 64,
-    "lr": 2e-4,
-    "weight_decay": 1e-4,
-    "lambda_clf": 0.1,
-    "patience": 6,
-    "clf_warmup_epochs": 5,
-    "clf_ramp_epochs": 5,
-    "debug_attn": true
-  }
+  "d_model": 128,
+  "nhead": 4,
+  "enc_layers": 1,
+  "cross_layers": 2,
+  "per_dim_tokens_thresh": 64,
+  "lr": 0.0001,
+  "weight_decay": 0.0001,
+  "lambda_clf": 0.05,
+  "chem_mode": "rdkit+mpnn",
+  "mpnn_ckpt": "/home/gongruyi/drug_delivery/LNP_ML_test/data/crossval_splits/all_amine_split_for_paper/cv_0/fold_0/model_0/model.pt",
+  "mpnn_cache_npz": "/home/gongruyi/drug_delivery/LNP_ML_test/data/smiles_mpnn_reg.npz",
+  "freeze_mpnn": true,
+  "mpnn_lr": 1e-05,
+  "mpnn_cache": "/home/gongruyi/drug_delivery/LNP_ML_test/data/smiles_mpnn_reg.npz",
+  "epochs": 100
+}
