@@ -1,0 +1,276 @@
+# 目标
+
+在 `LNP_ML` 中重构并新增注意力机制版本模型，采用模块化架构：各子模块独立成文件，显式标注输入/输出及张量形状，便于消融。多任务头同时支持回归与分类。全部超参（`d_model, num_heads, dropout` 等）集中配置。
+
+---
+
+# 目录结构（建议）
+
+```
+lnp_ml/
+  scripts/
+    models/
+        config.py                     # 全局超参与开关
+        registry.py                   # 模块注册/工厂
+        lnpmix_model.py               # 组网与前向，记录中间形状
+
+        encoders/
+        mpnn_encoder.py             # D-MPNN → chem token
+        rdkit_encoder.py            # RDKit → Morgan/MACCS/RDKit_feats 三个 tokens
+        tabular_encoder.py          # comp/phys/help/exp 四个 tokens
+
+        layers/
+        token_projector.py          # 8 tokens → 统一维度 d_model（独立/共享投影可选）
+        cross_modal_attention.py    # Cross-Attn: Q=Channel-A (RDKit+chem), K/V=Channel-B
+        channel_joiner.py           # 合并 Channel-A 输出与 Channel-B → [8, d_model]
+        sequence_pooler.py          # mean/max/attn/cls-like 池化
+
+        heads/
+        multitask_regression_head.py     # 回归多任务（可选异方差）
+        multitask_classification_head.py # 分类多任务（可选 focal/CB loss）
+```
+
+---
+
+# Token 与 Channel 设计（固定顺序）
+
+* 8 个 tokens：
+
+  1. `chem`（D-MPNN）
+  2. `comp`
+  3. `phys`
+  4. `help`
+  5. `exp`
+  6. `Morgan`
+  7. `MACCS`
+  8. `RDKit_feats`
+* **Channel-A（4 tokens）**：`[Morgan, MACCS, RDKit_feats, chem]`
+* **Channel-B（4 tokens）**：`[comp, phys, help, exp]`
+
+---
+
+# 模块接口与形状约定
+
+## encoders/mpnn_encoder.py
+
+* `forward(graph_batch) -> chem: Tensor[1, d_in]`
+* 说明：仅产生单 token 的分子表征。
+
+## encoders/rdkit_encoder.py
+
+* `forward(rdkit_dict) -> rdkit_tokens: Tensor[3, d_in]`
+* `rdkit_dict` keys：`{"Morgan","MACCS","RDKit_feats"}`，每类各 1 个 token。
+
+## encoders/tabular_encoder.py
+
+* 按列分组编码四个 token（顺序固定 `[comp, phys, help, exp]`）。
+* `forward(tabular_dict) -> tab_tokens: Tensor[4, d_in]`
+* 分组（来自截图）：
+
+  * `comp_cols = ['Cationic_Lipid_Mass_Ratio','Phospholipid_Mass_Ratio','Cholesterol_Mass_Ratio','PEG_Lipid_Mass_Ratio','Cationic_Lipid_to_mRNA_weight_ratio','Cationic_Lipid_Mol_Ratio','Phospholipid_Mol_Ratio','Cholesterol_Mol_Ratio','PEG_Lipid_Mol_Ratio']`
+  * `phys_cols = ['size','molecular_weight','PDI','MolWt','Tail_length','Tail_count','Num_tails']`
+  * `help_prefix = ['Helper_lipid_ID_']`（多列前缀聚合）
+  * `exp_prefix  = ['Route_of_administration_','Cargo_type_','Model_type_','Batch_or_individual_or_barcoded_','Purity_']`
+
+## layers/token_projector.py
+
+* 将 8 个原始 tokens 统一投影到 `d_model`。
+* `forward(tokens: Dict[str, Tensor]) -> proj_tokens: Tensor[8, d_model]`
+* 输入顺序固定：`[chem, comp, phys, help, exp, Morgan, MACCS, RDKit_feats]`
+* 可配置：`independent=True/False`（独立/共享线性层）。
+
+## layers/cross_modal_attention.py
+
+* **单向 Cross-Attention**：`Q ← Channel-A`, `K/V ← Channel-B`。
+* 输入：
+
+  * `chan_a: Tensor[4, d_model]`  # `[Morgan, MACCS, RDKit_feats, chem]`
+  * `chan_b: Tensor[4, d_model]`  # `[comp, phys, help, exp]`
+* 以 `d_model=128, num_heads=4` 为例：
+
+  * `Q`: `[4, 4, 32]`
+  * `K`: `[4, 4, 32]`
+  * `V`: `[4, 4, 32]`
+  * `Score`: `[4, 4, 4]`
+  * `Attn`: `[4, 4, 4]`
+  * `HeadOut`: `[4, 4, 32]`
+  * `Concat`: `[4, 128]`
+  * `Out`: `[4, 128]`
+* 输出：`chan_a_attended: Tensor[4, d_model]`
+* 选项：
+
+  * `bi_directional: bool`（如为 True，再做 `Q=chan_b, K/V=chan_a`，返回 `chan_b_attended`）
+  * `layers: int`（可堆叠）、`pre_norm/post_norm`、`residual`、`dropout`
+
+## layers/channel_joiner.py
+
+* 将注意力后的 Channel-A 表征与 Channel-B 表征**合并为序列**（不使用 “fusion” 一词）。
+* `forward(chan_a_att: Tensor[4, d_model], chan_b: Tensor[4, d_model]) -> seq_tokens: Tensor[8, d_model]`
+* 合并策略（可选项，名称专业且清晰）：
+
+  * `concatenate_sequence`（默认）：直接拼接顺序 `[chan_a_att; chan_b]`
+  * `interleave_by_source`：交错拼接（可选）
+  * `project_then_concatenate`：先各自线性再拼接（可选）
+
+## layers/sequence_pooler.py
+
+* 池化序列到单向量或保留序列：
+
+  * `mean_pool(seq: [8, d_model]) -> [d_model]`
+  * `max_pool(seq: [8, d_model])  -> [d_model]`
+  * `attention_pool(seq: [8, d_model]) -> [d_model]`（可学习 query）
+  * `cls_token_like(seq: [8, d_model], which='chem'|'Morgan'|idx) -> [d_model]`
+
+## heads/multitask_regression_head.py
+
+* 输入：`[8, d_model]` 或 `[d_model]`
+* 输出：多任务回归字典（如 `size, PDI, quantified_delivery, quantified_total_luminescence, Biodistribution_*`）。
+* 选项：`heteroscedastic=True/False`、`hidden_dims`、`dropout`。
+
+## heads/multitask_classification_head.py
+
+* 输入：同上
+* 输出：多任务分类 logits（如 `safety_profiles` 0/1/2）。
+* 选项：`loss={ce|focal|class_balanced}`, `label_smoothing`。
+
+---
+
+# lnpmix_model.py（前向流程与形状跟踪）
+
+```
+1) chem      = mpnn_encoder(batch.mol_graph)               # [1, d_in]
+2) rdkit3    = rdkit_encoder(batch.rdkit_feats)            # [3, d_in]
+3) tab4      = tabular_encoder(batch.tabular_dict)         # [4, d_in]
+
+4) 按固定顺序组成 8 tokens:
+   tokens = [chem, comp, phys, help, exp, Morgan, MACCS, RDKit_feats]
+
+5) proj = token_projector(tokens)                          # [8, d_model]
+   # 切分到两个 Channel
+   chan_a = proj[5:8] ⊕ proj[0]  →  [Morgan, MACCS, RDKit_feats, chem]  → [4, d_model]
+   chan_b = proj[1:5]            →  [comp, phys, help, exp]            → [4, d_model]
+
+6) chan_a_att = cross_modal_attention(Q=chan_a, K/V=chan_b)            # [4, d_model]
+   # 若 bi_directional=True，同时得到 chan_b_att
+
+7) seq_tokens = channel_joiner(chan_a_att, chan_b)                      # [8, d_model]
+
+8) pooled = sequence_pooler(seq_tokens)  或直接用 seq_tokens 进 heads
+
+9) reg_outputs = multitask_regression_head(pooled or seq_tokens)
+   cls_outputs = multitask_classification_head(pooled or seq_tokens)
+
+10) 返回:
+   {
+     "reg": reg_outputs,
+     "cls": cls_outputs,
+     "shapes": {
+        "chan_a": [4, d_model], "chan_b": [4, d_model],
+        "Q": [H,4,d_head], "K": [H,4,d_head], "V": [H,4,d_head],
+        "Score": [H,4,4], "Attn":[H,4,4], "HeadOut":[H,4,d_head],
+        "chan_a_att":[4,d_model], "seq_tokens":[8,d_model],
+        "pooled":[d_model]  # 若使用池化
+     }
+   }
+```
+
+说明：`H = num_heads`, `d_head = d_model / H`，必须整除；否则在初始化时报错。
+
+---
+
+# 关键形状示例（d_model=128, num_heads=4）
+
+维度如何变化（含 batch 维度 B）
+
+设 d_model=128, num_heads=4, d_head=32。
+
+原始输入（各自维度可能不同）
+
+Channel-A 原始：[B, 4, F_Ai]（4 个 token，各自特征维 F_Ai 可能不同）
+
+Channel-B 原始：[B, 4, F_Bj]
+
+逐 token 投影到 d_model（线性/MLP，互不共享或按配置共享）
+
+Channel-A 投影后：[B, 4, 128]
+
+Channel-B 投影后：[B, 4, 128]
+
+拆头
+
+Q = reshape([B, 4, 128] → [B, 4, 4, 32]) → 置换为 [B, 4(heads), 4(q_len), 32]
+
+K,V 同理来自 Channel-B：[B, 4, 4, 32]
+
+打分与注意力
+
+Score = Q @ K^T / sqrt(32) → [B, 4, 4, 4]（heads × q_len × k_len）
+
+Attn = softmax(Score, dim=-1) → [B, 4, 4, 4]
+
+HeadOut = Attn @ V → [B, 4, 4, 32]
+
+合并头
+
+Concat = reshape([B, 4, 4, 32] → [B, 4, 128])（仍是 Channel-A 的 4 个 token，各自 128）
+
+Out = W_o(Concat)（可选线性/残差/归一化）→ [B, 4, 128]
+
+通道合并为序列
+
+拼上未被改写的 Channel-B（或其变体）：[B, 4, 128] ⊕ [B, 4, 128] → [B, 8, 128]
+
+（可选）池化
+
+mean/max/attention/cls-like：[B, 8, 128] → [B, 128]
+
+任务头
+
+回归/分类 head 输入 seq=[B, 8, 128] 或 pooled=[B, 128]，视你的 head 设计而定。
+
+---
+
+# 配置（models/config.py 建议字段）需要变换为json文件
+
+```yaml
+d_model: 128        # {64,128,256}
+num_heads: 4        # 整除 d_model
+dropout: 0.1
+projection:
+  independent: true
+cross_attention:
+  enabled: true
+  layers: 1
+  bi_directional: false
+  pre_norm: true
+  residual: true
+  dropout: 0.1
+channel_join:
+  method: "concatenate_sequence"   # or interleave_by_source | project_then_concatenate
+pooling:
+  enabled: true
+  type: "attention_pool"           # mean|max|attention_pool|cls_token_like
+heads:
+  regression:
+    heteroscedastic: false
+    hidden_dims: [256,128]
+    dropout: 0.1
+  classification:
+    loss: "cross_entropy"          # focal|class_balanced
+    label_smoothing: 0.0
+ablation_switches:
+  use_rdkit: true
+  use_mpnn: true
+  use_tabular: true
+  use_cross_attention: true
+  use_pooling: true
+```
+
+---
+
+# 训练与评估要点
+
+* 训练集上做 `5-fold CV`，保留每折最优 checkpoint。
+* 记录每个超参组合的回归/分类指标，并导出表格。
+
+

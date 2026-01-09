@@ -1,0 +1,24 @@
+# 排除所有大文件
+results/
+data/
+*.log
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# 大型模型文件
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.hdf5
