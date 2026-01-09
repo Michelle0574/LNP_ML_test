@@ -1,0 +1,130 @@
+{
+  "model_name": "LNPMix_Attention_v3_Optimized",
+  "d_model": 256,
+  "num_heads": 2,
+  "dropout": 0.2365250987985752,
+  "mpnn_encoder": {
+    "checkpoint_path": "../data/crossval_splits/by_source_smiles_with_ultra_held_out/cv_0/fold_0/model_0/model.pt",
+    "use_regression_checkpoint": true,
+    "freeze": false,
+    "output_dim": 300
+  },
+  "projection": {
+    "independent": true,
+    "hidden_dims": []
+  },
+  "cross_attention": {
+    "enabled": true,
+    "layers": 4,
+    "bi_directional": false,
+    "pre_norm": true,
+    "residual": true,
+    "dropout": 0.2365250987985752
+  },
+  "channel_join": {
+    "method": "concatenate_sequence"
+  },
+  "pooling": {
+    "enabled": true,
+    "type": "attention_pool"
+  },
+  "heads": {
+    "regression": {
+      "heteroscedastic": false,
+      "hidden_dims": [
+        256,
+        128
+      ],
+      "dropout": 0.2999152501227984
+    },
+    "classification": {
+      "loss": "cross_entropy",
+      "label_smoothing": 0.05,
+      "hidden_dims": [
+        256,
+        128
+      ],
+      "dropout": 0.2125204429159016
+    }
+  },
+  "ablation_switches": {
+    "disable_rdkit_tokens": false,
+    "disable_mpnn_token": false,
+    "disable_tabular_tokens": false,
+    "disable_cross_attention": false,
+    "disable_pooling": false
+  },
+  "data_groups": {
+    "comp_cols": [
+      "Cationic_Lipid_Mol_Ratio",
+      "Phospholipid_Mol_Ratio",
+      "Cholesterol_Mol_Ratio",
+      "PEG_Lipid_Mol_Ratio",
+      "Cationic_Lipid_to_mRNA_weight_ratio"
+    ],
+    "phys_cols": [
+      "Purity_Crude",
+      "Purity_Pure",
+      "Mix_type_Hand",
+      "Mix_type_Microfluidic",
+      "Cargo_type_mRNA",
+      "Cargo_type_pDNA",
+      "Cargo_type_siRNA"
+    ],
+    "phys_prefixes": [
+      "Purity_",
+      "Mix_type_",
+      "Cargo_type_"
+    ],
+    "pdi_processing": {
+      "enabled": false,
+      "source_col": "PDI",
+      "output_cols": [
+        "pdi_mid",
+        "pdi_width",
+        "pdi_is_interval"
+      ]
+    },
+    "purity_processing": {
+      "enabled": true,
+      "source_col": "Purity",
+      "categories": [
+        "Pure",
+        "Crude"
+      ]
+    },
+    "help_prefixes": [
+      "Helper_lipid_ID_"
+    ],
+    "exp_prefixes": [
+      "Route_of_administration_",
+      "Model_type_",
+      "Batch_or_individual_or_barcoded_",
+      "Delivery_target_"
+    ]
+  },
+  "rdkit_features": {
+    "path": "../data/rdkit_features.npz",
+    "morgan_dim": 1024,
+    "maccs_dim": 167,
+    "rdkit_desc_dim": 210
+  },
+  "training": {
+    "batch_size": 64,
+    "learning_rate": 0.0004335048809035687,
+    "weight_decay": 0.00012982890053914268,
+    "max_epochs": 50,
+    "early_stopping_patience": 30,
+    "save_frequency": 10,
+    "gradient_clip_norm": 1.0,
+    "loss_weights": {
+      "regression": 1.0,
+      "classification": 1.0
+    }
+  },
+  "use_token_weights": true,
+  "token_weight_init_strategy": "balanced",
+  "use_task_loss_weights": true,
+  "classification_dropout": 0.2125204429159016,
+  "regression_dropout": 0.2999152501227984
+}

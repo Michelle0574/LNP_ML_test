@@ -1,31 +1,18 @@
-# 排除 results 所有内容
-results/
+# Exclude all results directories first
+results/*
 
-# 排除 data 中的大文件和训练相关文件
-data/crossval_splits/
-data/**/*.pt
-data/**/*.pth
-data/**/*.ckpt
-data/**/*.npz
-data/**/*.pkl
-data/**/*.pickle
-data/**/*.png
+# Then include specific directories
+!results/attention_model_best_regression_v3_extended/
+!results/attention_model_best_classification_v3_extended/
+!results/attention_model_best_classification_v5_extended/
+!results/attention_model_best_regression_v5_extended/
+!results/chemprop_model_extended/
+!results/hyperparam_search/
+!results/hyperparam_search_v3/
+!results/hyperparam_search_v5/
 
-# 排除备份文件
-*.backup
-*.bak
-*_before_update.csv
-
-# 排除日志和TensorBoard文件
-*.log
-events.out.tfevents.*
-
-# 排除系统文件
-.DS_Store
-*/.DS_Store
-
-# 排除大型数据文件
-*.xlsx
+# Exclude data directory
+data/
 
 # Python cache
 __pycache__/
@@ -38,3 +25,6 @@ __pycache__/
 # IDE
 .vscode/
 .idea/
+
+# Exclude all log files
+*.log

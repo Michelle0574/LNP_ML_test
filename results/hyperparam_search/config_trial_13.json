@@ -1,0 +1,123 @@
+{
+  "model_name": "LNPMix_Attention_v1",
+  "d_model": 256,
+  "num_heads": 2,
+  "dropout": 0.24728355979841055,
+  "mpnn_encoder": {
+    "checkpoint_path": null,
+    "use_regression_checkpoint": true,
+    "freeze": false,
+    "output_dim": 300
+  },
+  "projection": {
+    "independent": true,
+    "hidden_dims": []
+  },
+  "cross_attention": {
+    "enabled": true,
+    "layers": 1,
+    "bi_directional": false,
+    "pre_norm": true,
+    "residual": true,
+    "dropout": 0.24728355979841055
+  },
+  "channel_join": {
+    "method": "concatenate_sequence"
+  },
+  "pooling": {
+    "enabled": true,
+    "type": "attention_pool"
+  },
+  "heads": {
+    "regression": {
+      "heteroscedastic": false,
+      "hidden_dims": [
+        256,
+        128
+      ],
+      "dropout": 0.24728355979841055
+    },
+    "classification": {
+      "loss": "cross_entropy",
+      "label_smoothing": 0.0,
+      "hidden_dims": [
+        256,
+        128
+      ],
+      "dropout": 0.24728355979841055
+    }
+  },
+  "ablation_switches": {
+    "disable_rdkit_tokens": false,
+    "disable_mpnn_token": false,
+    "disable_tabular_tokens": false,
+    "disable_cross_attention": false,
+    "disable_pooling": false
+  },
+  "data_groups": {
+    "comp_cols": [
+      "Cationic_Lipid_Mass_Ratio",
+      "Phospholipid_Mass_Ratio",
+      "Cholesterol_Mass_Ratio",
+      "PEG_Lipid_Mass_Ratio",
+      "Cationic_Lipid_to_mRNA_weight_ratio",
+      "Cationic_Lipid_Mol_Ratio",
+      "Phospholipid_Mol_Ratio",
+      "Cholesterol_Mol_Ratio",
+      "PEG_Lipid_Mol_Ratio"
+    ],
+    "phys_cols": [
+      "size",
+      "molecular_weight",
+      "MolWt",
+      "Tail_length",
+      "Tail_count",
+      "Num_tails"
+    ],
+    "pdi_processing": {
+      "enabled": true,
+      "source_col": "PDI",
+      "output_cols": [
+        "pdi_mid",
+        "pdi_width",
+        "pdi_is_interval"
+      ]
+    },
+    "purity_processing": {
+      "enabled": true,
+      "source_col": "Purity",
+      "categories": [
+        "Pure",
+        "Crude"
+      ]
+    },
+    "help_prefixes": [
+      "Helper_lipid_ID_"
+    ],
+    "exp_prefixes": [
+      "Route_of_administration_",
+      "Cargo_type_",
+      "Model_type_",
+      "Batch_or_individual_or_barcoded_",
+      "Purity_"
+    ]
+  },
+  "rdkit_features": {
+    "path": "../data/rdkit_features.npz",
+    "morgan_dim": 1024,
+    "maccs_dim": 167,
+    "rdkit_desc_dim": 210
+  },
+  "training": {
+    "batch_size": 32,
+    "learning_rate": 0.0003592566543705367,
+    "weight_decay": 3.4471520358963927e-07,
+    "max_epochs": 50,
+    "early_stopping_patience": 10,
+    "save_frequency": 10,
+    "loss_weights": {
+      "regression": 1.0,
+      "classification": 1.0
+    }
+  }
+}

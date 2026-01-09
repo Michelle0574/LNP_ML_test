@@ -1,0 +1,3400 @@
+{
+  "train_loss": [
+    4.076057441931954,
+    3.429240730601102,
+    3.401501025576686,
+    3.3950072070540913,
+    3.3690091984925554,
+    3.3546875928846656,
+    3.342729349778951,
+    3.3286255550603587,
+    3.342888137465414,
+    3.3403344644978072,
+    3.316853848569791,
+    3.3121151360034213,
+    3.288050615404138,
+    3.2980322069267403,
+    3.287825475060374,
+    3.2998068288858597,
+    3.2880156299421652,
+    3.2792252417180294,
+    3.286779220947628,
+    3.2773300089843422,
+    3.2702548779535805,
+    3.2713020817244036,
+    3.2647394213888217,
+    3.272803936216404,
+    3.2767736975668402,
+    3.273109010313773,
+    3.2689260401367957,
+    3.265934023886326,
+    3.266971339675588,
+    3.259246392600569
+  ],
+  "val_loss": [
+    2.292509451358309,
+    2.3215539299191965,
+    2.326443040833598,
+    2.231097238679086,
+    2.526393859136489,
+    2.5346837401269906,
+    2.435419630469574,
+    2.5040311387950376,
+    2.487358834955,
+    2.4472889432142817,
+    2.412397193812555,
+    2.434170418509072,
+    2.479714091386526,
+    2.33202245633208,
+    2.45775677131549,
+    2.367329903848229,
+    2.8816692087378715,
+    2.4271560605134694,
+    2.3861718877489047,
+    2.339459755608151,
+    2.429402044403457,
+    2.420286285931305,
+    2.4907502888311304,
+    2.4644909212666173,
+    3.1169784250819395,
+    2.375110906098158,
+    2.35512850974356,
+    2.3093240519745217,
+    2.3755918457923877,
+    3.0205902505305504
+  ],
+  "val_metrics": [
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.12662935256958008,
+        "R2": -0.3796851385440112
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.012261011637747288,
+        "R2": -0.694365586007355
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2810571789741516,
+        "R2": -0.05403270588849174
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.6327696442604065,
+        "R2": -1.6172465641454372
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04918571561574936,
+        "R2": -0.5148043518131169
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.40762200951576233,
+        "R2": -0.9299818319816198
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.18097026646137238,
+        "R2": -0.5017283906842847
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9600273370742798,
+        "R2": 0.06891430792949038
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7173221111297607,
+        "R2": -0.843543906254087
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.3313519222644698,
+        "PR_AUC": 0.0018850128892312172
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9723389467522194,
+        "PR_AUC": 0.9053417527568429
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.926762971217781,
+        "PR_AUC": 0.5658557674966924
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9948266573710229,
+        "PR_AUC": 0.3628633773290876
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9984735991566923,
+        "PR_AUC": 0.9978497031317626
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5334547109695038,
+        "PR_AUC": 0.11846412387206809
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.935282798641956,
+        "PR_AUC": 0.4878434644822832
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9749277934454925,
+        "PR_AUC": 0.6782737138696869
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.958314165398634,
+        "PR_AUC": 0.37906452959320935
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5534395865434002,
+        "PR_AUC": 0.2941904421860693
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.6164768564768566,
+        "PR_AUC": 0.784796225167923
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.6439083032790284,
+        "PR_AUC": 0.33656075556676107
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.44680134680134675,
+        "PR_AUC": 0.3821836659736517
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9983388704318937,
+        "PR_AUC": 0.5833333333333333
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.6009115108493991,
+        "PR_AUC": 0.8412748605791129
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.12651725113391876,
+        "R2": -0.37724354998231213
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.009513323195278645,
+        "R2": -0.02004422263942751
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2807093858718872,
+        "R2": -0.05142553280978568
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5418201684951782,
+        "R2": -0.9189501261036275
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04356082156300545,
+        "R2": -0.18814828563109942
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.4333454668521881,
+        "R2": -1.1812553146440337
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.20169009268283844,
+        "R2": -0.8652886594124494
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9467917084693909,
+        "R2": 0.09441049273470925
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7294622659683228,
+        "R2": -0.906473514501446
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9454034643008027,
+        "PR_AUC": 0.05134348551978687
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9746386752945272,
+        "PR_AUC": 0.921364450702969
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9503465002368793,
+        "PR_AUC": 0.6104227537967949
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9910793509950565,
+        "PR_AUC": 0.3291986841175737
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9991015956314317,
+        "PR_AUC": 0.9988670153328066
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.4994689728417539,
+        "PR_AUC": 0.1078357545224782
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9422852989310133,
+        "PR_AUC": 0.49083661582917487
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9835445638432365,
+        "PR_AUC": 0.7639634347584082
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9604996376113544,
+        "PR_AUC": 0.3958814615892163
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5634549948638932,
+        "PR_AUC": 0.29799651924559245
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.6167032967032966,
+        "PR_AUC": 0.7817832729806681
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7032707374704639,
+        "PR_AUC": 0.4062078637616648
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.4072390572390572,
+        "PR_AUC": 0.30777362111443274
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9966777408637875,
+        "PR_AUC": 0.41666666666666663
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.45851818988464954,
+        "PR_AUC": 0.781412246172372
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.12363681197166443,
+        "R2": -0.3152455214595269
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.009922917000949383,
+        "R2": -0.10977071561617469
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28417307138442993,
+        "R2": -0.07753279537545965
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.567433774471283,
+        "R2": -1.1046682936894623
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04598173126578331,
+        "R2": -0.32388160248170106
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.47349169850349426,
+        "R2": -1.604130365761777
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.1890498399734497,
+        "R2": -0.638813598342562
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9457901120185852,
+        "R2": 0.09632545374910761
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.6906240582466125,
+        "R2": -0.7088678862606006
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9787790452049008,
+        "PR_AUC": 0.22790092678739785
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9764171970027413,
+        "PR_AUC": 0.9332410905556285
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9400456121174636,
+        "PR_AUC": 0.568472393833534
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9822220813791355,
+        "PR_AUC": 0.3111817530626333
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9992221838036144,
+        "PR_AUC": 0.9989647899428111
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5159308147473829,
+        "PR_AUC": 0.10278743147882709
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9584696549180654,
+        "PR_AUC": 0.49875261913607416
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9866376543810171,
+        "PR_AUC": 0.7649116530211768
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9592139115299878,
+        "PR_AUC": 0.3807980364226598
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5628531073446327,
+        "PR_AUC": 0.29711618283839364
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.6155311355311356,
+        "PR_AUC": 0.7794709475658315
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.706151805331012,
+        "PR_AUC": 0.40852022974143004
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.5900336700336699,
+        "PR_AUC": 0.4682353405502079
+      },
+      "acute_toxicity_present": {
+        "AUC": 1.0,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.5276881503589578,
+        "PR_AUC": 0.8037015943665459
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.12704813480377197,
+        "R2": -0.3888258283049508
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010583673603832722,
+        "R2": -0.26248853268155936
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28059348464012146,
+        "R2": -0.05055760724064262
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.6324486136436462,
+        "R2": -1.6145915615498545
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04398256540298462,
+        "R2": -0.211266431235126
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.4912339150905609,
+        "R2": -1.802945757540832
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.2383098304271698,
+        "R2": -1.6041190821233573
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9431332945823669,
+        "R2": 0.10139536169661223
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7654735445976257,
+        "R2": -1.099353125833325
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9935487959442332,
+        "PR_AUC": 0.21312268452665595
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9739872927690365,
+        "PR_AUC": 0.9306557704823082
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9601601841884848,
+        "PR_AUC": 0.5918213661727768
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9973776777791862,
+        "PR_AUC": 0.3833184488542569
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9992536639338059,
+        "PR_AUC": 0.9989227897675417
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5411546047640722,
+        "PR_AUC": 0.10957149074162581
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9536402261822445,
+        "PR_AUC": 0.49656048478201326
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9899833462997181,
+        "PR_AUC": 0.8127142591449638
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9626516888097271,
+        "PR_AUC": 0.37050612693955803
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5631901643554186,
+        "PR_AUC": 0.2996871112117102
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.6148384948384947,
+        "PR_AUC": 0.778165233957716
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7027940140115242,
+        "PR_AUC": 0.41876351034561293
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.3502693602693603,
+        "PR_AUC": 0.2757579850886194
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9950166112956811,
+        "PR_AUC": 0.3333333333333333
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.465626764539808,
+        "PR_AUC": 0.7884913267114809
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.1353141814470291,
+        "R2": -0.575425385588747
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010760113596916199,
+        "R2": -0.30493311153508373
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2778230607509613,
+        "R2": -0.02991469802194402
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.4915822744369507,
+        "R2": -0.579595044347551
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.044040534645318985,
+        "R2": -0.214461279937471
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.7816323637962341,
+        "R2": -6.096481492309881
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.2950119376182556,
+        "R2": -2.9907650189922705
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9272259473800659,
+        "R2": 0.13145232654213168
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.6859432458877563,
+        "R2": -0.6857822257772923
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9923658639628221,
+        "PR_AUC": 0.21797274010268608
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9772756256666306,
+        "PR_AUC": 0.9369422667018947
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9526316538762392,
+        "PR_AUC": 0.6067998534452029
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.945240207884396,
+        "PR_AUC": 0.14293352133241566
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9992071504353188,
+        "PR_AUC": 0.9988514660168022
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5249962069488696,
+        "PR_AUC": 0.10880578136771313
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.95895899589927,
+        "PR_AUC": 0.49985014812602635
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9899659632402995,
+        "PR_AUC": 0.8283071508518711
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9549478173456375,
+        "PR_AUC": 0.2599980499916414
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5435285053929122,
+        "PR_AUC": 0.28583138581871315
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5964835164835166,
+        "PR_AUC": 0.7678219020524267
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7053849023753264,
+        "PR_AUC": 0.42362227660162344
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.04791245791245791,
+        "PR_AUC": 0.06678768644958163
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9999999999999999,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.27085181898846494,
+        "PR_AUC": 0.727692974813379
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13222256302833557,
+        "R2": -0.5042585091253899
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.01028931699693203,
+        "R2": -0.1932394092598826
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28132331371307373,
+        "R2": -0.056029555615661586
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5369055271148682,
+        "R2": -0.8842957951702182
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04600460082292557,
+        "R2": -0.3251988448749692
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.640564501285553,
+        "R2": -3.7661064103040207
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.24241487681865692,
+        "R2": -1.69460738781215
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9412304759025574,
+        "R2": 0.10501762153721483
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7047436833381653,
+        "R2": -0.7794568003609126
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9651415293620617,
+        "PR_AUC": 0.2048229645122424
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9773546804104866,
+        "PR_AUC": 0.9374842597977042
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9461004684594619,
+        "PR_AUC": 0.6063134938169357
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9471415895550767,
+        "PR_AUC": 0.11304804830334689
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9993288307752837,
+        "PR_AUC": 0.9991920190195663
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5289030496131089,
+        "PR_AUC": 0.1065834294153031
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.956614660715208,
+        "PR_AUC": 0.4980761085633111
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9910044490907323,
+        "PR_AUC": 0.8384453975135789
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9552250151705193,
+        "PR_AUC": 0.24989822637065745
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5422364535182332,
+        "PR_AUC": 0.2954042528177897
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5910356310356311,
+        "PR_AUC": 0.7604131662163935
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7110434025618704,
+        "PR_AUC": 0.3766552432279269
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.08434343434343435,
+        "PR_AUC": 0.08567901374438731
+      },
+      "acute_toxicity_present": {
+        "AUC": 1.0,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.24426272485278697,
+        "PR_AUC": 0.7206898669344125
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13561469316482544,
+        "R2": -0.5824309351057899
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010594813153147697,
+        "R2": -0.26514737939813826
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28020456433296204,
+        "R2": -0.04764728445978017
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5549478530883789,
+        "R2": -1.013064311163653
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.043777815997600555,
+        "R2": -0.20001516433663014
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.6523186564445496,
+        "R2": -3.942624356993803
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.22787488996982574,
+        "R2": -1.3810576112340813
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9183943867683411,
+        "R2": 0.14791893710359016
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.6813916563987732,
+        "R2": -0.6634842597489441
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9964427545416139,
+        "PR_AUC": 0.2743247850326076
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9770212811001866,
+        "PR_AUC": 0.9377176131987759
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9632981428504765,
+        "PR_AUC": 0.6167554341934235
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9880688300164786,
+        "PR_AUC": 0.36303699268293466
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9993953887648314,
+        "PR_AUC": 0.9992777993321816
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5256030951297224,
+        "PR_AUC": 0.11202955914853988
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9588354895717701,
+        "PR_AUC": 0.499434168926006
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9900480161431489,
+        "PR_AUC": 0.8195836653696357
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9582263533217211,
+        "PR_AUC": 0.28467950566566075
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.542027799178223,
+        "PR_AUC": 0.2822665995608518
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5886247086247087,
+        "PR_AUC": 0.7555526157618792
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7052190855200431,
+        "PR_AUC": 0.3773813122881078
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.14878787878787877,
+        "PR_AUC": 0.1590369155555732
+      },
+      "acute_toxicity_present": {
+        "AUC": 1.0,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.41772202952327175,
+        "PR_AUC": 0.7695854285030475
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13607926666736603,
+        "R2": -0.5932911337114861
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010649141855537891,
+        "R2": -0.2781558357637661
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2786324620246887,
+        "R2": -0.03592433160734321
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.4760397672653198,
+        "R2": -0.4812890900725819
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.043584514409303665,
+        "R2": -0.18944102064534274
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.6026167869567871,
+        "R2": -3.2181351000225966
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.3298931121826172,
+        "R2": -3.990262790531152
+      },
+      "quantified_delivery": {
+        "RMSE": 0.918107271194458,
+        "R2": 0.14845155956261868
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7167555689811707,
+        "R2": -0.840633284035671
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9963244613434727,
+        "PR_AUC": 0.26749404059650767
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9772276131415365,
+        "PR_AUC": 0.938638834857487
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9591962554879674,
+        "PR_AUC": 0.6011950081727374
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9381654835847383,
+        "PR_AUC": 0.1407574425897638
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.999533772847347,
+        "PR_AUC": 0.9994838024478009
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5258306781975421,
+        "PR_AUC": 0.10632253765912994
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589459711801812,
+        "PR_AUC": 0.499810696115444
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9895371000680735,
+        "PR_AUC": 0.8151196195124796
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9477262569905622,
+        "PR_AUC": 0.22388595664729513
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5267077555213149,
+        "PR_AUC": 0.27792667044179703
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5824042624042624,
+        "PR_AUC": 0.7531293436186566
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7071467064627119,
+        "PR_AUC": 0.38990031556517685
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.04202020202020203,
+        "PR_AUC": 0.06684012871390368
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9999999999999999,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.17546583850931677,
+        "PR_AUC": 0.7038971982688983
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13945697247982025,
+        "R2": -0.6733689578836388
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010796554386615753,
+        "R2": -0.3137868468986016
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.27675262093544006,
+        "R2": -0.021993478569071412
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.4937632977962494,
+        "R2": -0.5936426044186052
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.045465562492609024,
+        "R2": -0.2943260506478622
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.6290106177330017,
+        "R2": -3.5957233954959733
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.21308480203151703,
+        "R2": -1.0820058153333223
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9163702726364136,
+        "R2": 0.15167080340072892
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.73288494348526,
+        "R2": -0.9244060772425042
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9960414026193494,
+        "PR_AUC": 0.2573064557162966
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9778431227917599,
+        "PR_AUC": 0.9399064693993542
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9611203560386822,
+        "PR_AUC": 0.6156799481392292
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9690470908860438,
+        "PR_AUC": 0.21781215996064487
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995380130281483,
+        "PR_AUC": 0.9995255052939013
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5412304657866788,
+        "PR_AUC": 0.12157382081689724
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9588988993883867,
+        "PR_AUC": 0.4996378720918449
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9902440921909949,
+        "PR_AUC": 0.8238878622744996
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9592702685345736,
+        "PR_AUC": 0.31442230282740397
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5457916024653312,
+        "PR_AUC": 0.285448470434056
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5921012321012321,
+        "PR_AUC": 0.7606854843663989
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.6985864113087095,
+        "PR_AUC": 0.4182255972406441
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.2139057239057239,
+        "PR_AUC": 0.23180468597497644
+      },
+      "acute_toxicity_present": {
+        "AUC": 1.0,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.27620593692022266,
+        "PR_AUC": 0.7294532736860293
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.1414240300655365,
+        "R2": -0.7209078023947992
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010315866209566593,
+        "R2": -0.1994050002078236
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2780591547489166,
+        "R2": -0.03166587738223203
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5575731992721558,
+        "R2": -1.0321559732709034
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.0444033220410347,
+        "R2": -0.23455228378637916
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5256950259208679,
+        "R2": -2.210005253270781
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.23643068969249725,
+        "R2": -1.5632125706915438
+      },
+      "quantified_delivery": {
+        "RMSE": 0.932430624961853,
+        "R2": 0.12167444791056181
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7185154557228088,
+        "R2": -0.8496826602921694
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9971229404309252,
+        "PR_AUC": 0.28636662945606034
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9780623925914028,
+        "PR_AUC": 0.9401627166170413
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9694356498995141,
+        "PR_AUC": 0.6339613526202037
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9866903283052351,
+        "PR_AUC": 0.29959441098754536
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995003653622456,
+        "PR_AUC": 0.9994448461580465
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5259444697314519,
+        "PR_AUC": 0.10543682330916104
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9587702517244042,
+        "PR_AUC": 0.49910506843162816
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9900908052124866,
+        "PR_AUC": 0.8129820006374083
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9632893093383557,
+        "PR_AUC": 0.3520458992661033
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5553736517719569,
+        "PR_AUC": 0.2945273073887955
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5942857142857143,
+        "PR_AUC": 0.7635860857693871
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7098619574679766,
+        "PR_AUC": 0.3592537396040027
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.07383838383838384,
+        "PR_AUC": 0.08537968623857306
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9999999999999999,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.3671251109139308,
+        "PR_AUC": 0.7566183554151222
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.14103417098522186,
+        "R2": -0.711433150128364
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.011145039461553097,
+        "R2": -0.39996684657948944
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2791208326816559,
+        "R2": -0.03955907453778473
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5279035568237305,
+        "R2": -0.8216396916911519
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04385457932949066,
+        "R2": -0.20422714987160262
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5829722881317139,
+        "R2": -2.947606012392804
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.26442980766296387,
+        "R2": -2.2062525991037956
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9341798424720764,
+        "R2": 0.11837594488789782
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7676618099212646,
+        "R2": -1.1113730360812926
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9978580481622306,
+        "PR_AUC": 0.31940120793061966
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9778965540532821,
+        "PR_AUC": 0.9400900583606462
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9695738624454959,
+        "PR_AUC": 0.637275657411726
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9863813537837495,
+        "PR_AUC": 0.3091210609336032
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995625868032467,
+        "PR_AUC": 0.999547070132239
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5279927173418297,
+        "PR_AUC": 0.11826139016452067
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9587606545629703,
+        "PR_AUC": 0.499020675968939
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9888585529514733,
+        "PR_AUC": 0.8123658878738895
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9507597055280979,
+        "PR_AUC": 0.22507047062093963
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5365145095017976,
+        "PR_AUC": 0.2844760213295616
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5854811854811854,
+        "PR_AUC": 0.7544692896823576
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7039132777846867,
+        "PR_AUC": 0.3629333383648248
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.07589225589225589,
+        "PR_AUC": 0.08597786507665456
+      },
+      "acute_toxicity_present": {
+        "AUC": 1.0,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.3019581350326692,
+        "PR_AUC": 0.7387137800980779
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13691449165344238,
+        "R2": -0.6129096944596899
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010680588893592358,
+        "R2": -0.2857155597720604
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.27838876843452454,
+        "R2": -0.034113131435717925
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.45775139331817627,
+        "R2": -0.3696596515875128
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04585662856698036,
+        "R2": -0.31668743960564316
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5513428449630737,
+        "R2": -2.5308680103512415
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.2659120261669159,
+        "R2": -2.2422975847082456
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9062374234199524,
+        "R2": 0.17032788578947256
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7937479019165039,
+        "R2": -1.2573052593695055
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9945204900718208,
+        "PR_AUC": 0.14081362889834356
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9738931999814502,
+        "PR_AUC": 0.9367546316269564
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9668544960007339,
+        "PR_AUC": 0.6282596292627713
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9709009380149575,
+        "PR_AUC": 0.21850757412055105
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995254852212353,
+        "PR_AUC": 0.99947302034712
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5281065088757396,
+        "PR_AUC": 0.11803554410761713
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9588431444505328,
+        "PR_AUC": 0.4994308058795142
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9858104395604395,
+        "PR_AUC": 0.7530388064460227
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9548357586504725,
+        "PR_AUC": 0.2539926431424635
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5473404596815614,
+        "PR_AUC": 0.28953375558151173
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5908624708624709,
+        "PR_AUC": 0.7652148355245975
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7111263109895121,
+        "PR_AUC": 0.3515445651217372
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.07629629629629629,
+        "PR_AUC": 0.0855092149833185
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9983388704318936,
+        "PR_AUC": 0.5833333333333333
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.3360893764620473,
+        "PR_AUC": 0.7464950678812621
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.14005902409553528,
+        "R2": -0.6878482369768337
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010899589397013187,
+        "R2": -0.3389822081526772
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2775389552116394,
+        "R2": -0.027809391846901788
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.46878162026405334,
+        "R2": -0.43646303713700085
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.044871583580970764,
+        "R2": -0.26072783066796457
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5327889919281006,
+        "R2": -2.2972237954472114
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.2759575843811035,
+        "R2": -2.4918981796992457
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9099259972572327,
+        "R2": 0.16356028231622288
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7821017503738403,
+        "R2": -1.1915511267339984
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9978453738910014,
+        "PR_AUC": 0.32026331662675517
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9759575285319576,
+        "PR_AUC": 0.936530301793294
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9650365759037993,
+        "PR_AUC": 0.6222267516201331
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9490192039548738,
+        "PR_AUC": 0.14754528947321946
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995211807952704,
+        "PR_AUC": 0.9994868314704733
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.502086178121681,
+        "PR_AUC": 0.10066478829594985
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589593386550356,
+        "PR_AUC": 0.4998521512451607
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9900155596615774,
+        "PR_AUC": 0.834903881578682
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9466561292174371,
+        "PR_AUC": 0.2065455168542891
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.541570364663585,
+        "PR_AUC": 0.2908522114362966
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5909956709956711,
+        "PR_AUC": 0.7567825983741339
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7049289060232972,
+        "PR_AUC": 0.35146656971429424
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.0460942760942761,
+        "PR_AUC": 0.06690134781367772
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9983388704318937,
+        "PR_AUC": 0.75
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.2193877551020408,
+        "PR_AUC": 0.7134896868843218
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13762012124061584,
+        "R2": -0.6295776787249883
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010676729492843151,
+        "R2": -0.28478677019979526
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2821689248085022,
+        "R2": -0.06238775548756892
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.4896669387817383,
+        "R2": -0.5673100667337978
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04535280913114548,
+        "R2": -0.28791408458370693
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5154364109039307,
+        "R2": -2.0859448869638095
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.2216637134552002,
+        "R2": -1.253025709754111
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9023589491844177,
+        "R2": 0.1774142882107581
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7787545323371887,
+        "R2": -1.1728325227990268
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9970342205323194,
+        "PR_AUC": 0.2593369037093777
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9778393002722643,
+        "PR_AUC": 0.939516366610485
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9689593208247355,
+        "PR_AUC": 0.6288166948165135
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9858030168589175,
+        "PR_AUC": 0.3263258476237739
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995551664868444,
+        "PR_AUC": 0.9995375850774939
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5444166287361553,
+        "PR_AUC": 0.11981624669197893
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.958890558998093,
+        "PR_AUC": 0.49961625946142
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9882593844208889,
+        "PR_AUC": 0.7972531455227257
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9577027574302779,
+        "PR_AUC": 0.2903667860306369
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5573959938366718,
+        "PR_AUC": 0.29487546982544666
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5962837162837163,
+        "PR_AUC": 0.7619777706892042
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7029391037598972,
+        "PR_AUC": 0.34825904799050816
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.19831649831649834,
+        "PR_AUC": 0.16428431879978583
+      },
+      "acute_toxicity_present": {
+        "AUC": 1.0,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.2810861498749698,
+        "PR_AUC": 0.7332445102478162
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13725773990154266,
+        "R2": -0.6210068947372267
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010483790189027786,
+        "R2": -0.23877156034903035
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2807904779911041,
+        "R2": -0.05203329591089467
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.48880478739738464,
+        "R2": -0.5617955771531287
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04476867988705635,
+        "R2": -0.2549519509722009
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.4571993350982666,
+        "R2": -1.4280026334723552
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.29923704266548157,
+        "R2": -3.105893402078731
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9280321598052979,
+        "R2": 0.12994134636440824
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7969342470169067,
+        "R2": -1.2754646132249188
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9971651880016899,
+        "PR_AUC": 0.2777367237221009
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9775196368287236,
+        "PR_AUC": 0.9388644967707472
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9653760765353456,
+        "PR_AUC": 0.6170430350475865
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9455887945240207,
+        "PR_AUC": 0.22304563085932433
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9996014230046769,
+        "PR_AUC": 0.9996016122022887
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5322030040964952,
+        "PR_AUC": 0.11590773400481866
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9585975028185949,
+        "PR_AUC": 0.49812184174185525
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9890361519011961,
+        "PR_AUC": 0.8142531828896954
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9477124953964191,
+        "PR_AUC": 0.21175989531462974
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5299659732922446,
+        "PR_AUC": 0.2822553196648504
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5867465867465868,
+        "PR_AUC": 0.7558290972870426
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.695974795837997,
+        "PR_AUC": 0.3447877834699817
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.21983164983164977,
+        "PR_AUC": 0.2296087451396066
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9916943521594683,
+        "PR_AUC": 0.22619047619047616
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.4598995724772122,
+        "PR_AUC": 0.784466445237594
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.1379324048757553,
+        "R2": -0.6369817603339962
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010859892703592777,
+        "R2": -0.3292467607952163
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.27979594469070435,
+        "R2": -0.04459386860983505
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5226975679397583,
+        "R2": -0.7858883371338172
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04388508200645447,
+        "R2": -0.20590289945962037
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5437219738960266,
+        "R2": -2.433932301004696
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.26746082305908203,
+        "R2": -2.280177328951806
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9186092615127563,
+        "R2": 0.1475201570070418
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7780328989028931,
+        "R2": -1.168807585227385
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9979087452471482,
+        "PR_AUC": 0.32299170876192695
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9780320644696896,
+        "PR_AUC": 0.9397980085717408
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.967351982074683,
+        "PR_AUC": 0.6299702353096363
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9953178476359488,
+        "PR_AUC": 0.3698710360969368
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995697501389944,
+        "PR_AUC": 0.9995490192758785
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5315581854043392,
+        "PR_AUC": 0.11832239859991561
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589602526704101,
+        "PR_AUC": 0.4998549577128717
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9906181318681319,
+        "PR_AUC": 0.841390228082135
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9523449101105776,
+        "PR_AUC": 0.24380993895222577
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5551970980996405,
+        "PR_AUC": 0.2999485632596834
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5891841491841493,
+        "PR_AUC": 0.7602336989645583
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7093230526883059,
+        "PR_AUC": 0.35941128342191353
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.06279461279461282,
+        "PR_AUC": 0.08545204699916675
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9950166112956811,
+        "PR_AUC": 0.325
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.2008449624909252,
+        "PR_AUC": 0.7108346004820792
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.1410604566335678,
+        "R2": -0.7120711698361979
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010854307562112808,
+        "R2": -0.3278800934334176
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28571465611457825,
+        "R2": -0.0892554247978794
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.4490813612937927,
+        "R2": -0.3182668494210765
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04532121494412422,
+        "R2": -0.2861202887111858
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.41537970304489136,
+        "R2": -1.0041423025439413
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.41344118118286133,
+        "R2": -6.837983677609527
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9795109629631042,
+        "R2": 0.030738169705213036
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.798827052116394,
+        "R2": -1.2862863873630714
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9978960709759188,
+        "PR_AUC": 0.3211999710582111
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9776511146970916,
+        "PR_AUC": 0.9397086941514916
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.8770885121844543,
+        "PR_AUC": 0.5740051430980445
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9558958676638357,
+        "PR_AUC": 0.19001748583770045
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995403258540398,
+        "PR_AUC": 0.9995210670885725
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5250341374601729,
+        "PR_AUC": 0.11553593629980549
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589458569282594,
+        "PR_AUC": 0.49980744010670153
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.98995016045901,
+        "PR_AUC": 0.8474090150271394
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9458540248730984,
+        "PR_AUC": 0.20233544843320048
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5273096430405751,
+        "PR_AUC": 0.2871825851313007
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5838028638028638,
+        "PR_AUC": 0.7543724899211834
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7062968950793849,
+        "PR_AUC": 0.34402795613294146
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.10521885521885523,
+        "PR_AUC": 0.08643728713460098
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9950166112956811,
+        "PR_AUC": 0.325
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.19857626845204487,
+        "PR_AUC": 0.7090881273670285
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.1391543745994568,
+        "R2": -0.6661149952315784
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.01052081398665905,
+        "R2": -0.24753636131771994
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2829381823539734,
+        "R2": -0.06818821765753413
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.4942830204963684,
+        "R2": -0.596999221842808
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04523766040802002,
+        "R2": -0.28138266749432606
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5103917717933655,
+        "R2": -2.0258357455557867
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.2869860827922821,
+        "R2": -2.7765792043001154
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9240210056304932,
+        "R2": 0.13744624850692932
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.799717128276825,
+        "R2": -1.291384100684327
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9977228559357837,
+        "PR_AUC": 0.31143486792442254
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9776542651252476,
+        "PR_AUC": 0.9366955253723233
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.962528186263848,
+        "PR_AUC": 0.6249763767860711
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9813664596273292,
+        "PR_AUC": 0.27165033156484364
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995651244872111,
+        "PR_AUC": 0.9995566957353029
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5395615232893339,
+        "PR_AUC": 0.12024936975936903
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589632232203777,
+        "PR_AUC": 0.49986424225822146
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9888363074978119,
+        "PR_AUC": 0.8152108081149863
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9572584545336589,
+        "PR_AUC": 0.27117609100783385
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.552741397021058,
+        "PR_AUC": 0.3002103833750671
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5893706293706295,
+        "PR_AUC": 0.7609065639060162
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7130332048252704,
+        "PR_AUC": 0.35693463279482607
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.09299663299663301,
+        "PR_AUC": 0.08584483788119071
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9916943521594684,
+        "PR_AUC": 0.22619047619047616
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.27883762200532386,
+        "PR_AUC": 0.7302417643778866
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.141780823469162,
+        "R2": -0.7296018667465662
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010691210627555847,
+        "R2": -0.2882741449191901
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.27926966547966003,
+        "R2": -0.04066814910749428
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5032700896263123,
+        "R2": -0.6556003077092143
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04494147375226021,
+        "R2": -0.2646582040682939
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.6228758692741394,
+        "R2": -3.506516744031763
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.22053749859333038,
+        "R2": -1.2301898466910113
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9261068105697632,
+        "R2": 0.13354775436003952
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7843915224075317,
+        "R2": -1.204402330950439
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9979171947613013,
+        "PR_AUC": 0.32393687470709287
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9774402880449065,
+        "PR_AUC": 0.9392347522150611
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9692217071602404,
+        "PR_AUC": 0.6335797640535142
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9977262644188111,
+        "PR_AUC": 0.3961576787973254
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995721914552134,
+        "PR_AUC": 0.9995579919642174
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5229100288271886,
+        "PR_AUC": 0.11400335000424874
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589616236934722,
+        "PR_AUC": 0.4998578877936678
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9890710395798892,
+        "PR_AUC": 0.8255264172636058
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.964022605711979,
+        "PR_AUC": 0.367137354361744
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5647871725731896,
+        "PR_AUC": 0.3033605368207469
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.6008125208125209,
+        "PR_AUC": 0.7637534659957333
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7154790034406997,
+        "PR_AUC": 0.3484503976320567
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.0975084175084175,
+        "PR_AUC": 0.06887013281772783
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9916943521594684,
+        "PR_AUC": 0.22619047619047616
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.268230216987981,
+        "PR_AUC": 0.7264706143269382
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.1376713514328003,
+        "R2": -0.6307914714319731
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010465508326888084,
+        "R2": -0.23445475519051673
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28278249502182007,
+        "R2": -0.06701299656267601
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.47665953636169434,
+        "R2": -0.485148478864349
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.044828638434410095,
+        "R2": -0.25831559928248393
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5090904831886292,
+        "R2": -2.010425505084527
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.25429975986480713,
+        "R2": -1.965301353095215
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9113929867744446,
+        "R2": 0.16086110533025266
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7976565361022949,
+        "R2": -1.2795907684623637
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9971778622729193,
+        "PR_AUC": 0.2718178842915425
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9779011746812438,
+        "PR_AUC": 0.9401788033806395
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9659684725121148,
+        "PR_AUC": 0.6108437288833432
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9728498542274053,
+        "PR_AUC": 0.28020173201048215
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995874175589998,
+        "PR_AUC": 0.9995739247940368
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5177514792899408,
+        "PR_AUC": 0.11321105776024237
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9588515990927483,
+        "PR_AUC": 0.49948534177488646
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9894851940095303,
+        "PR_AUC": 0.8302903752892242
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9544347064783032,
+        "PR_AUC": 0.2417097198724712
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5562162942989215,
+        "PR_AUC": 0.29568211394943006
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.593939393939394,
+        "PR_AUC": 0.7621987387411641
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7031878290428222,
+        "PR_AUC": 0.3507633816055764
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.08013468013468014,
+        "PR_AUC": 0.0860779137981694
+      },
+      "acute_toxicity_present": {
+        "AUC": 1.0,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.25436597563926755,
+        "PR_AUC": 0.7246626896051385
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13833776116371155,
+        "R2": -0.6466174942681473
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010686521418392658,
+        "R2": -0.287144378547477
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2798426151275635,
+        "R2": -0.04494231084701528
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5281673669815063,
+        "R2": -0.8234607773079052
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04516550153493881,
+        "R2": -0.2772976871935531
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5778790712356567,
+        "R2": -2.878929626267842
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.23418095707893372,
+        "R2": -1.5146646978374068
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9419288635253906,
+        "R2": 0.1036890060931468
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7855460047721863,
+        "R2": -1.2108961448746909
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9979552175749895,
+        "PR_AUC": 0.3256875749872049
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9760352810988424,
+        "PR_AUC": 0.9320193510587966
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9588344114834655,
+        "PR_AUC": 0.6251938135358625
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9893205729496768,
+        "PR_AUC": 0.4107777033237069
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995614625128828,
+        "PR_AUC": 0.9995539336289985
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5449097253830982,
+        "PR_AUC": 0.12234287046092487
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589641372357525,
+        "PR_AUC": 0.4998651376997504
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9891656131479141,
+        "PR_AUC": 0.8213953191169099
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9609013450975303,
+        "PR_AUC": 0.31872392324660215
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5585114920390344,
+        "PR_AUC": 0.3035386425688144
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5927139527139529,
+        "PR_AUC": 0.7633998728024872
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7002653069684532,
+        "PR_AUC": 0.35163131674938286
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.2564983164983165,
+        "PR_AUC": 0.2519810437095156
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9916943521594684,
+        "PR_AUC": 0.22619047619047616
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.37951722190852627,
+        "PR_AUC": 0.7627844174061282
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13149741291999817,
+        "R2": -0.48780383625529167
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010652217082679272,
+        "R2": -0.2788938160406331
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28456002473831177,
+        "R2": -0.08046931294970561
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.46388277411460876,
+        "R2": -0.4065974890382673
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04522405564785004,
+        "R2": -0.28061201853479667
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.4369664788246155,
+        "R2": -1.2178606115781014
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.30850744247436523,
+        "R2": -3.364235971327405
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9248485565185547,
+        "R2": 0.13590060693227923
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.8033795356750488,
+        "R2": -1.31241931309938
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9979678918462189,
+        "PR_AUC": 0.3265422758419058
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9783101842672826,
+        "PR_AUC": 0.9407591729502438
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9640044307106299,
+        "PR_AUC": 0.6243887864013263
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9734678032703765,
+        "PR_AUC": 0.2783027074715958
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995575435578997,
+        "PR_AUC": 0.9995517132055775
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5144894553178576,
+        "PR_AUC": 0.11370579731016103
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589533975551003,
+        "PR_AUC": 0.49983307885999106
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9887687202178352,
+        "PR_AUC": 0.8211967482790111
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9459628069982293,
+        "PR_AUC": 0.20065158743033756
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5335772984078069,
+        "PR_AUC": 0.2839075535803319
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.586000666000666,
+        "PR_AUC": 0.7550697672516561
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7083074244496952,
+        "PR_AUC": 0.3564076653132623
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.15239057239057238,
+        "PR_AUC": 0.0883649913258125
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9916943521594684,
+        "PR_AUC": 0.22619047619047616
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.46908526256352345,
+        "PR_AUC": 0.787735548608792
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13512171804904938,
+        "R2": -0.5709468547912384
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.01069941371679306,
+        "R2": -0.29025182995097776
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2857426404953003,
+        "R2": -0.08946862086455765
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.4807250499725342,
+        "R2": -0.5105908150062552
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.045256685465574265,
+        "R2": -0.28246069743625934
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.442286878824234,
+        "R2": -1.2721976943087112
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.33827081322669983,
+        "R2": -4.246939525394947
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9228070974349976,
+        "R2": 0.13971102332734953
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.8062565922737122,
+        "R2": -1.329011551782819
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9975158428390367,
+        "PR_AUC": 0.31043093845725417
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9784716122059853,
+        "PR_AUC": 0.9413974552806557
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9327316177313844,
+        "PR_AUC": 0.5876880707387072
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9652839396628216,
+        "PR_AUC": 0.24720061863686155
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995387197249485,
+        "PR_AUC": 0.9995216754420261
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5155515096343499,
+        "PR_AUC": 0.11155413742522176
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589568251127552,
+        "PR_AUC": 0.49984401617732743
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9899039677137023,
+        "PR_AUC": 0.8175599967003283
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9460473425051081,
+        "PR_AUC": 0.2033075173902915
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5258169619928095,
+        "PR_AUC": 0.27991001668880644
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5861871461871463,
+        "PR_AUC": 0.7552523477172942
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7079343365253076,
+        "PR_AUC": 0.3559887976953811
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.09966329966329965,
+        "PR_AUC": 0.0860234556267635
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9916943521594683,
+        "PR_AUC": 0.22619047619047616
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.4078506896829878,
+        "PR_AUC": 0.7727620423956358
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13642701506614685,
+        "R2": -0.6014449113815201
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010807554237544537,
+        "R2": -0.3164650583835271
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28060343861579895,
+        "R2": -0.0506320387359418
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.49731001257896423,
+        "R2": -0.616619167233063
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04490259289741516,
+        "R2": -0.2624707288915329
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.4963517487049103,
+        "R2": -1.8616540646568436
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.2675314247608185,
+        "R2": -2.2819089831150334
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9768171310424805,
+        "R2": 0.03606215301583604
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7972789406776428,
+        "R2": -1.2774333579538046
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.997879171947613,
+        "PR_AUC": 0.3199785813919356
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9763047477204343,
+        "PR_AUC": 0.9340545603198367
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9567444163317798,
+        "PR_AUC": 0.62186842516581
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9764704018253265,
+        "PR_AUC": 0.2974479072379958
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995816354942708,
+        "PR_AUC": 0.999572596935949
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5393339402215142,
+        "PR_AUC": 0.11211390676856493
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589652797549708,
+        "PR_AUC": 0.49986927532329745
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9885057862491491,
+        "PR_AUC": 0.8176325772310219
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9459175903317593,
+        "PR_AUC": 0.2028617869308832
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5494912044170519,
+        "PR_AUC": 0.2988374372403994
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5905427905427906,
+        "PR_AUC": 0.7568298749628608
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.71052522488911,
+        "PR_AUC": 0.3505976840367757
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.09080808080808082,
+        "PR_AUC": 0.08586205160624769
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9900332225913621,
+        "PR_AUC": 0.19444444444444442
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.3897818020488828,
+        "PR_AUC": 0.7756323358622851
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.14071781933307648,
+        "R2": -0.7037640216498888
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010634097270667553,
+        "R2": -0.27454691853329805
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2904178500175476,
+        "R2": -0.12541122998626686
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.43763288855552673,
+        "R2": -0.2519104416388105
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.045440178364515305,
+        "R2": -0.29288094984442803
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.34079667925834656,
+        "R2": -0.34905209658873315
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.5056037306785583,
+        "R2": -10.721884454174573
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9958618879318237,
+        "R2": -0.001891543344728186
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.8066709041595459,
+        "R2": -1.3314058235877781
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9978833967046895,
+        "PR_AUC": 0.3203414260944029
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9747860313208008,
+        "PR_AUC": 0.9324524254939083
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.8454852941060159,
+        "PR_AUC": 0.5655504225561837
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9383556217518063,
+        "PR_AUC": 0.14082183719651048
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995497698930973,
+        "PR_AUC": 0.9995499354471776
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5154377181004401,
+        "PR_AUC": 0.11077901244688429
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.958954311570475,
+        "PR_AUC": 0.4998347037421642
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9895443936594379,
+        "PR_AUC": 0.8438665030207794
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9442563693244892,
+        "PR_AUC": 0.17487149613337405
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5233371854134566,
+        "PR_AUC": 0.28362099633245413
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.582990342990343,
+        "PR_AUC": 0.7517592803126931
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7057372631928036,
+        "PR_AUC": 0.34926552877813033
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.12164983164983165,
+        "PR_AUC": 0.07373047739164354
+      },
+      "acute_toxicity_present": {
+        "AUC": 1.0,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.17238041461643944,
+        "PR_AUC": 0.7028084590731438
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13807253539562225,
+        "R2": -0.6403097016794779
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.01075348723679781,
+        "R2": -0.30332635601715485
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28108417987823486,
+        "R2": -0.054235091860002305
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.48631158471107483,
+        "R2": -0.5459042390842561
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.044565532356500626,
+        "R2": -0.24358867540578988
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5146596431732178,
+        "R2": -2.0766511782010717
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.26024526357650757,
+        "R2": -2.105579211442494
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9234064221382141,
+        "R2": 0.13859326818531914
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7981667518615723,
+        "R2": -1.2825078136848105
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9978833967046894,
+        "PR_AUC": 0.3210896925030467
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.977774065406585,
+        "PR_AUC": 0.9391334789247583
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9601026450599,
+        "PR_AUC": 0.6269996900917152
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9744501838002282,
+        "PR_AUC": 0.2977943780517044
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995671803324482,
+        "PR_AUC": 0.9995502740950069
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5468062509482629,
+        "PR_AUC": 0.12503830933541568
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589593386550355,
+        "PR_AUC": 0.4998505724670013
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9884498687153555,
+        "PR_AUC": 0.8201614745651946
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9479313702746945,
+        "PR_AUC": 0.20937176702770402
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5512647663071392,
+        "PR_AUC": 0.30404858361169584
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5899833499833499,
+        "PR_AUC": 0.7613422924439516
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7125357542594203,
+        "PR_AUC": 0.36052590428710674
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.1639057239057239,
+        "PR_AUC": 0.08858483584374018
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9950166112956811,
+        "PR_AUC": 0.325
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.32758933612970875,
+        "PR_AUC": 0.7432032933932506
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.1397848129272461,
+        "R2": -0.6812456164176035
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010653703473508358,
+        "R2": -0.2792508448520774
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2789927124977112,
+        "R2": -0.0386050011740906
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5115994811058044,
+        "R2": -0.7108561756982561
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.04473990201950073,
+        "R2": -0.2533390010572134
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5609670281410217,
+        "R2": -2.6552126867910997
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.2613896131515503,
+        "R2": -2.132951424778281
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9192181825637817,
+        "R2": 0.14638968245147121
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7923809289932251,
+        "R2": -1.2495370627054099
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9977566539923953,
+        "PR_AUC": 0.3133419038774894
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9778660579087339,
+        "PR_AUC": 0.9405921000672275
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9683855113706019,
+        "PR_AUC": 0.6350704193409145
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9778092914184306,
+        "PR_AUC": 0.2733363212034484
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995748255069232,
+        "PR_AUC": 0.9995552698517374
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5345167652859961,
+        "PR_AUC": 0.116582036196104
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589621949530812,
+        "PR_AUC": 0.49986084734108216
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9888356996985316,
+        "PR_AUC": 0.8350394455985288
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9546352325643879,
+        "PR_AUC": 0.2497068477212371
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5574200693374423,
+        "PR_AUC": 0.3013554604034624
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5895437895437895,
+        "PR_AUC": 0.7609453195460469
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7125979355801516,
+        "PR_AUC": 0.3670549687276974
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.11525252525252526,
+        "PR_AUC": 0.08720807252922369
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9916943521594684,
+        "PR_AUC": 0.22619047619047616
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.3214285714285714,
+        "PR_AUC": 0.7409342092104028
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.1394844651222229,
+        "R2": -0.6740289369611796
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010884578339755535,
+        "R2": -0.3352966285536032
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.27926263213157654,
+        "R2": -0.0406155446674219
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.5028481483459473,
+        "R2": -0.6528257079181741
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.044841036200523376,
+        "R2": -0.25901181537510665
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5734478831291199,
+        "R2": -2.8196705978067365
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.24309618771076202,
+        "R2": -1.7097751002667647
+      },
+      "quantified_delivery": {
+        "RMSE": 0.895444393157959,
+        "R2": 0.18997261311578817
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7949386835098267,
+        "R2": -1.2640828745986767
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9973299535276722,
+        "PR_AUC": 0.28741199201426026
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9782020615729761,
+        "PR_AUC": 0.9398913028120489
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9646943070667541,
+        "PR_AUC": 0.6269839739285937
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9742758904804159,
+        "PR_AUC": 0.29175458966560386
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995838840749988,
+        "PR_AUC": 0.999576706444763
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5436959490213928,
+        "PR_AUC": 0.12383367637019652
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589597956627229,
+        "PR_AUC": 0.4998529413653381
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9903525235826122,
+        "PR_AUC": 0.8308225027164472
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9494451456304317,
+        "PR_AUC": 0.21506871584504952
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5482152028762198,
+        "PR_AUC": 0.2928807058415035
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5864269064269064,
+        "PR_AUC": 0.7551492367705457
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7099034116817975,
+        "PR_AUC": 0.3834222192687287
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.09171717171717174,
+        "PR_AUC": 0.08594608643591777
+      },
+      "acute_toxicity_present": {
+        "AUC": 1.0,
+        "PR_AUC": 1.0
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.2988323788013229,
+        "PR_AUC": 0.7369332352998987
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.13888762891292572,
+        "R2": -0.6597336294381886
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010698252357542515,
+        "R2": -0.28997161062115184
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.2798972725868225,
+        "R2": -0.04535075274464995
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.48888009786605835,
+        "R2": -0.5622768517422774
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.044643815606832504,
+        "R2": -0.24796141097070645
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.5513166785240173,
+        "R2": -2.5305324325403222
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.25047847628593445,
+        "R2": -1.8768534444662608
+      },
+      "quantified_delivery": {
+        "RMSE": 0.916013777256012,
+        "R2": 0.1523306505609161
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.7976041436195374,
+        "R2": -1.2792913413675566
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9978960709759188,
+        "PR_AUC": 0.3218674702808244
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.976901522824558,
+        "PR_AUC": 0.9327835055963538
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.9543863007046269,
+        "PR_AUC": 0.6184502462811126
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9827370389149448,
+        "PR_AUC": 0.32364909652784557
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995857471847447,
+        "PR_AUC": 0.9995822851960138
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.54631315430132,
+        "PR_AUC": 0.12440592778925863
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589692785722348,
+        "PR_AUC": 0.4998825570253863
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.9894562627637848,
+        "PR_AUC": 0.831723024375311
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9579655383470097,
+        "PR_AUC": 0.2804276927101339
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.55748427067283,
+        "PR_AUC": 0.30179894174052746
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5933932733932734,
+        "PR_AUC": 0.7646830824102
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7169091738175185,
+        "PR_AUC": 0.3870207690060278
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.08050505050505051,
+        "PR_AUC": 0.08609419602735327
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9925249169435216,
+        "PR_AUC": 0.24285714285714285
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.2854521255142373,
+        "PR_AUC": 0.7307807847652479
+      }
+    },
+    {
+      "Biodistribution_heart": {
+        "RMSE": 0.1411701738834381,
+        "R2": -0.7147351459859985
+      },
+      "Biodistribution_kidney": {
+        "RMSE": 0.010708118788897991,
+        "R2": -0.2923520889961251
+      },
+      "Biodistribution_liver": {
+        "RMSE": 0.28825703263282776,
+        "R2": -0.10872643556355488
+      },
+      "Biodistribution_lung": {
+        "RMSE": 0.41999614238739014,
+        "R2": -0.15303874520855576
+      },
+      "Biodistribution_lymph_nodes": {
+        "RMSE": 0.045427389442920685,
+        "R2": -0.29215355226866513
+      },
+      "Biodistribution_muscle": {
+        "RMSE": 0.3710012137889862,
+        "R2": -0.5987799284637085
+      },
+      "Biodistribution_spleen": {
+        "RMSE": 0.478383868932724,
+        "R2": -9.493733213268788
+      },
+      "quantified_delivery": {
+        "RMSE": 0.9696411490440369,
+        "R2": 0.05017289034494732
+      },
+      "quantified_total_luminescence": {
+        "RMSE": 0.8073477745056152,
+        "R2": -1.3353200817972128
+      },
+      "Delivery_target_dendritic_cell": {
+        "AUC": 0.9977693282636249,
+        "PR_AUC": 0.31363003160421365
+      },
+      "Delivery_target_generic_cell": {
+        "AUC": 0.9782657002217229,
+        "PR_AUC": 0.9406191373336974
+      },
+      "Delivery_target_liver": {
+        "AUC": 0.8520186545413994,
+        "PR_AUC": 0.5571163000697835
+      },
+      "Delivery_target_lung": {
+        "AUC": 0.9381496387374826,
+        "PR_AUC": 0.1407105379957973
+      },
+      "Delivery_target_lung_epithelium": {
+        "AUC": 0.9995815070039435,
+        "PR_AUC": 0.9995797756963458
+      },
+      "Delivery_target_lymph_nodes": {
+        "AUC": 0.5271582460931573,
+        "PR_AUC": 0.11401005497893871
+      },
+      "Delivery_target_macrophage": {
+        "AUC": 0.9589703068395314,
+        "PR_AUC": 0.49988458285142173
+      },
+      "Delivery_target_muscle": {
+        "AUC": 0.989489813284061,
+        "PR_AUC": 0.827707495629792
+      },
+      "Delivery_target_spleen": {
+        "AUC": 0.9441600381654878,
+        "PR_AUC": 0.17422829656804392
+      },
+      "Encapsulation_Efficiency_50<=EE<80": {
+        "AUC": 0.5237063430919363,
+        "PR_AUC": 0.2785186902779917
+      },
+      "Encapsulation_Efficiency_80<EE<=100": {
+        "AUC": 0.5833633033633033,
+        "PR_AUC": 0.7542867065665227
+      },
+      "Encapsulation_Efficiency_EE<50": {
+        "AUC": 0.7066699830037724,
+        "PR_AUC": 0.37836602599737507
+      },
+      "acute_toxicity_none": {
+        "AUC": 0.27326599326599327,
+        "PR_AUC": 0.28695934402604406
+      },
+      "acute_toxicity_present": {
+        "AUC": 0.9916943521594684,
+        "PR_AUC": 0.22619047619047616
+      },
+      "chronic_toxicity_none": {
+        "AUC": 0.17724046140195207,
+        "PR_AUC": 0.7043024340409585
+      }
+    }
+  ],
+  "token_weights": [
+    {
+      "epoch": 1,
+      "weights": {
+        "chem": 0.734332799911499,
+        "Morgan": 0.6982835531234741,
+        "MACCS": 0.6934176683425903,
+        "RDKit_feats": 0.7148250341415405,
+        "comp": 0.72348552942276,
+        "phys": 0.7289203405380249,
+        "help": 0.7250301837921143,
+        "exp": 0.7354666590690613
+      }
+    },
+    {
+      "epoch": 2,
+      "weights": {
+        "chem": 0.7317913174629211,
+        "Morgan": 0.7027057409286499,
+        "MACCS": 0.6918689012527466,
+        "RDKit_feats": 0.713070809841156,
+        "comp": 0.71265709400177,
+        "phys": 0.7229169607162476,
+        "help": 0.7160094976425171,
+        "exp": 0.7325824499130249
+      }
+    },
+    {
+      "epoch": 3,
+      "weights": {
+        "chem": 0.7275912761688232,
+        "Morgan": 0.7071106433868408,
+        "MACCS": 0.6904299855232239,
+        "RDKit_feats": 0.7110924124717712,
+        "comp": 0.7029359340667725,
+        "phys": 0.7173610925674438,
+        "help": 0.7076308727264404,
+        "exp": 0.7298200130462646
+      }
+    },
+    {
+      "epoch": 4,
+      "weights": {
+        "chem": 0.723148763179779,
+        "Morgan": 0.7105643153190613,
+        "MACCS": 0.6888065338134766,
+        "RDKit_feats": 0.7083724737167358,
+        "comp": 0.6935554146766663,
+        "phys": 0.7113840579986572,
+        "help": 0.6995465159416199,
+        "exp": 0.7264077663421631
+      }
+    },
+    {
+      "epoch": 5,
+      "weights": {
+        "chem": 0.7182252407073975,
+        "Morgan": 0.7151782512664795,
+        "MACCS": 0.6874586343765259,
+        "RDKit_feats": 0.7066314816474915,
+        "comp": 0.6839439272880554,
+        "phys": 0.7049845457077026,
+        "help": 0.6909217238426208,
+        "exp": 0.7228388786315918
+      }
+    },
+    {
+      "epoch": 6,
+      "weights": {
+        "chem": 0.7134841680526733,
+        "Morgan": 0.7189903259277344,
+        "MACCS": 0.6866573095321655,
+        "RDKit_feats": 0.705035924911499,
+        "comp": 0.6754802465438843,
+        "phys": 0.6994557976722717,
+        "help": 0.6833368539810181,
+        "exp": 0.7188591957092285
+      }
+    },
+    {
+      "epoch": 7,
+      "weights": {
+        "chem": 0.7076976299285889,
+        "Morgan": 0.7213026881217957,
+        "MACCS": 0.684461772441864,
+        "RDKit_feats": 0.7030148506164551,
+        "comp": 0.6672210097312927,
+        "phys": 0.6935485601425171,
+        "help": 0.675268292427063,
+        "exp": 0.7156795859336853
+      }
+    },
+    {
+      "epoch": 8,
+      "weights": {
+        "chem": 0.7026790976524353,
+        "Morgan": 0.7246519327163696,
+        "MACCS": 0.6838855743408203,
+        "RDKit_feats": 0.7014824748039246,
+        "comp": 0.6588682532310486,
+        "phys": 0.6880732774734497,
+        "help": 0.6675568222999573,
+        "exp": 0.7115579843521118
+      }
+    },
+    {
+      "epoch": 9,
+      "weights": {
+        "chem": 0.6970924139022827,
+        "Morgan": 0.7271250486373901,
+        "MACCS": 0.6829660534858704,
+        "RDKit_feats": 0.6996576189994812,
+        "comp": 0.6510346531867981,
+        "phys": 0.6811338067054749,
+        "help": 0.6597063541412354,
+        "exp": 0.7072102427482605
+      }
+    },
+    {
+      "epoch": 10,
+      "weights": {
+        "chem": 0.6913731694221497,
+        "Morgan": 0.7295701503753662,
+        "MACCS": 0.6816008687019348,
+        "RDKit_feats": 0.6979436278343201,
+        "comp": 0.643663227558136,
+        "phys": 0.675531268119812,
+        "help": 0.6527454853057861,
+        "exp": 0.7042312026023865
+      }
+    },
+    {
+      "epoch": 11,
+      "weights": {
+        "chem": 0.6888387203216553,
+        "Morgan": 0.7302690744400024,
+        "MACCS": 0.6805668473243713,
+        "RDKit_feats": 0.6964390277862549,
+        "comp": 0.6396901607513428,
+        "phys": 0.6723099946975708,
+        "help": 0.6493014097213745,
+        "exp": 0.7020056843757629
+      }
+    },
+    {
+      "epoch": 12,
+      "weights": {
+        "chem": 0.6861123442649841,
+        "Morgan": 0.7313409447669983,
+        "MACCS": 0.6796067357063293,
+        "RDKit_feats": 0.695084273815155,
+        "comp": 0.635817289352417,
+        "phys": 0.6692976951599121,
+        "help": 0.645902156829834,
+        "exp": 0.7001144886016846
+      }
+    },
+    {
+      "epoch": 13,
+      "weights": {
+        "chem": 0.6839955449104309,
+        "Morgan": 0.7324092388153076,
+        "MACCS": 0.6784275770187378,
+        "RDKit_feats": 0.6940183639526367,
+        "comp": 0.6320953369140625,
+        "phys": 0.6658414602279663,
+        "help": 0.6419647932052612,
+        "exp": 0.6973687410354614
+      }
+    },
+    {
+      "epoch": 14,
+      "weights": {
+        "chem": 0.681288480758667,
+        "Morgan": 0.7333044409751892,
+        "MACCS": 0.6777169704437256,
+        "RDKit_feats": 0.6924850344657898,
+        "comp": 0.6285750269889832,
+        "phys": 0.6628207564353943,
+        "help": 0.6387118101119995,
+        "exp": 0.6956061124801636
+      }
+    },
+    {
+      "epoch": 15,
+      "weights": {
+        "chem": 0.6783170104026794,
+        "Morgan": 0.7340435981750488,
+        "MACCS": 0.6769970655441284,
+        "RDKit_feats": 0.6912961006164551,
+        "comp": 0.6248353719711304,
+        "phys": 0.6594473719596863,
+        "help": 0.6349332332611084,
+        "exp": 0.6929388642311096
+      }
+    },
+    {
+      "epoch": 16,
+      "weights": {
+        "chem": 0.6759093403816223,
+        "Morgan": 0.7347115874290466,
+        "MACCS": 0.676147997379303,
+        "RDKit_feats": 0.6902636885643005,
+        "comp": 0.6211184859275818,
+        "phys": 0.6559911966323853,
+        "help": 0.6315586566925049,
+        "exp": 0.6906358003616333
+      }
+    },
+    {
+      "epoch": 17,
+      "weights": {
+        "chem": 0.6746352314949036,
+        "Morgan": 0.7349838614463806,
+        "MACCS": 0.6756608486175537,
+        "RDKit_feats": 0.6897693872451782,
+        "comp": 0.6194211840629578,
+        "phys": 0.654079794883728,
+        "help": 0.6297433972358704,
+        "exp": 0.6894714832305908
+      }
+    },
+    {
+      "epoch": 18,
+      "weights": {
+        "chem": 0.6735900640487671,
+        "Morgan": 0.7351064085960388,
+        "MACCS": 0.6749911904335022,
+        "RDKit_feats": 0.6890397667884827,
+        "comp": 0.6175786852836609,
+        "phys": 0.6524426341056824,
+        "help": 0.6278003454208374,
+        "exp": 0.6882619261741638
+      }
+    },
+    {
+      "epoch": 19,
+      "weights": {
+        "chem": 0.6725249290466309,
+        "Morgan": 0.7351834774017334,
+        "MACCS": 0.6741501092910767,
+        "RDKit_feats": 0.6884405612945557,
+        "comp": 0.6158873438835144,
+        "phys": 0.6508370637893677,
+        "help": 0.625937819480896,
+        "exp": 0.6869866251945496
+      }
+    },
+    {
+      "epoch": 20,
+      "weights": {
+        "chem": 0.6712836623191833,
+        "Morgan": 0.7353357076644897,
+        "MACCS": 0.6735752820968628,
+        "RDKit_feats": 0.6878544688224792,
+        "comp": 0.6143085360527039,
+        "phys": 0.6491604447364807,
+        "help": 0.6240934729576111,
+        "exp": 0.6856403946876526
+      }
+    },
+    {
+      "epoch": 21,
+      "weights": {
+        "chem": 0.670131266117096,
+        "Morgan": 0.7354419827461243,
+        "MACCS": 0.6728405952453613,
+        "RDKit_feats": 0.6870269775390625,
+        "comp": 0.6126406788825989,
+        "phys": 0.647311806678772,
+        "help": 0.6223381161689758,
+        "exp": 0.6843268871307373
+      }
+    },
+    {
+      "epoch": 22,
+      "weights": {
+        "chem": 0.6689722537994385,
+        "Morgan": 0.7357087135314941,
+        "MACCS": 0.6725121736526489,
+        "RDKit_feats": 0.6863499879837036,
+        "comp": 0.6107951402664185,
+        "phys": 0.6455694437026978,
+        "help": 0.620451807975769,
+        "exp": 0.6829216480255127
+      }
+    },
+    {
+      "epoch": 23,
+      "weights": {
+        "chem": 0.668317437171936,
+        "Morgan": 0.7356569766998291,
+        "MACCS": 0.6720718741416931,
+        "RDKit_feats": 0.6859480142593384,
+        "comp": 0.6099691390991211,
+        "phys": 0.6445643901824951,
+        "help": 0.6194198131561279,
+        "exp": 0.6822714805603027
+      }
+    },
+    {
+      "epoch": 24,
+      "weights": {
+        "chem": 0.6678398251533508,
+        "Morgan": 0.7356019020080566,
+        "MACCS": 0.6716333627700806,
+        "RDKit_feats": 0.6855546236038208,
+        "comp": 0.6091915369033813,
+        "phys": 0.6436062455177307,
+        "help": 0.6184956431388855,
+        "exp": 0.6814974546432495
+      }
+    },
+    {
+      "epoch": 25,
+      "weights": {
+        "chem": 0.6672636866569519,
+        "Morgan": 0.7356095910072327,
+        "MACCS": 0.6714193820953369,
+        "RDKit_feats": 0.6852532029151917,
+        "comp": 0.6082425117492676,
+        "phys": 0.6427338123321533,
+        "help": 0.6174765825271606,
+        "exp": 0.680804967880249
+      }
+    },
+    {
+      "epoch": 26,
+      "weights": {
+        "chem": 0.6666862964630127,
+        "Morgan": 0.7355870008468628,
+        "MACCS": 0.6710290908813477,
+        "RDKit_feats": 0.684849202632904,
+        "comp": 0.6074694395065308,
+        "phys": 0.6418108940124512,
+        "help": 0.6164402961730957,
+        "exp": 0.6800699234008789
+      }
+    },
+    {
+      "epoch": 27,
+      "weights": {
+        "chem": 0.666109025478363,
+        "Morgan": 0.7356530427932739,
+        "MACCS": 0.6706500053405762,
+        "RDKit_feats": 0.6844485402107239,
+        "comp": 0.6065958738327026,
+        "phys": 0.6410533785820007,
+        "help": 0.6155575513839722,
+        "exp": 0.6793868541717529
+      }
+    },
+    {
+      "epoch": 28,
+      "weights": {
+        "chem": 0.6655608415603638,
+        "Morgan": 0.7355813980102539,
+        "MACCS": 0.6702835559844971,
+        "RDKit_feats": 0.6840651631355286,
+        "comp": 0.6056892275810242,
+        "phys": 0.6400710940361023,
+        "help": 0.6145370006561279,
+        "exp": 0.6785902380943298
+      }
+    },
+    {
+      "epoch": 29,
+      "weights": {
+        "chem": 0.6653523445129395,
+        "Morgan": 0.7355660796165466,
+        "MACCS": 0.6701674461364746,
+        "RDKit_feats": 0.6839011311531067,
+        "comp": 0.6052348017692566,
+        "phys": 0.6395812034606934,
+        "help": 0.614013671875,
+        "exp": 0.6782212257385254
+      }
+    },
+    {
+      "epoch": 30,
+      "weights": {
+        "chem": 0.6650837063789368,
+        "Morgan": 0.7355344891548157,
+        "MACCS": 0.6699451804161072,
+        "RDKit_feats": 0.6837059855461121,
+        "comp": 0.6048160195350647,
+        "phys": 0.6391425728797913,
+        "help": 0.613594114780426,
+        "exp": 0.6778881549835205
+      }
+    }
+  ]
+}
