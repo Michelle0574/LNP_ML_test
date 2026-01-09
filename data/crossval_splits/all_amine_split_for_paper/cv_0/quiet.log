@@ -1,92 +1,40 @@
 Fold 0
-Model 0 best validation rmse = 0.168862 on epoch 6
-Model 0 test rmse = 0.302142
-Ensemble test rmse = 0.152345
+Model 0 best validation rmse = 0.988594 on epoch 14
+Model 0 test rmse = 0.888062
+Ensemble test rmse = 0.888062
 1-fold cross validation
-	Seed 42 ==> test rmse = 0.152345
-Overall test rmse = 0.152345 +/- 0.000000
-Elapsed time = 0:01:26
+	Seed 42 ==> test rmse = 0.888062
+Overall test rmse = 0.888062 +/- 0.000000
+Elapsed time = 0:06:15
 Fold 0
-Model 0 best validation auc = 0.903263 on epoch 9
-Model 0 test auc = 0.835735
-Ensemble test auc = 0.835735
+Model 0 best validation rmse = 0.889198 on epoch 23
+Model 0 test rmse = 1.016737
+Ensemble test rmse = 1.016737
 1-fold cross validation
-	Seed 42 ==> test auc = 0.835735
-Overall test auc = 0.835735 +/- 0.000000
-Elapsed time = 0:01:18
+	Seed 42 ==> test rmse = 1.016737
+Overall test rmse = 1.016737 +/- 0.000000
+Elapsed time = 0:06:23
 Fold 0
-Model 0 best validation rmse = 0.198287 on epoch 9
-Model 0 test rmse = 0.288864
-Ensemble test rmse = 0.173079
+Model 0 best validation rmse = 0.889024 on epoch 22
+Model 0 test rmse = 0.878807
+Ensemble test rmse = 0.878807
 1-fold cross validation
-	Seed 42 ==> test rmse = 0.173079
-Overall test rmse = 0.173079 +/- 0.000000
-Elapsed time = 0:01:11
+	Seed 42 ==> test rmse = 0.878807
+Overall test rmse = 0.878807 +/- 0.000000
+Elapsed time = 0:06:27
 Fold 0
-Model 0 best validation auc = 0.860318 on epoch 9
-Model 0 test auc = 0.887579
-Ensemble test auc = 0.887579
+Model 0 best validation rmse = 0.879277 on epoch 17
+Model 0 test rmse = 0.924593
+Ensemble test rmse = 0.924593
 1-fold cross validation
-	Seed 42 ==> test auc = 0.887579
-Overall test auc = 0.887579 +/- 0.000000
-Elapsed time = 0:01:12
+	Seed 42 ==> test rmse = 0.924593
+Overall test rmse = 0.924593 +/- 0.000000
+Elapsed time = 0:06:13
 Fold 0
-Model 0 best validation rmse = 0.177065 on epoch 8
-Model 0 test rmse = 0.363428
-Ensemble test rmse = 0.199959
+Model 0 best validation rmse = 0.881056 on epoch 17
+Model 0 test rmse = 0.826890
+Ensemble test rmse = 0.826890
 1-fold cross validation
-	Seed 42 ==> test rmse = 0.199959
-Overall test rmse = 0.199959 +/- 0.000000
-Elapsed time = 0:01:15
-Fold 0
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Warning: Found a task with targets all 0s or all 1s
-Model 0 best validation auc = -inf on epoch 0
-Model 0 test auc = 0.549145
-Ensemble test auc = 0.549145
-1-fold cross validation
-	Seed 42 ==> test auc = 0.549145
-Overall test auc = 0.549145 +/- 0.000000
-Elapsed time = 0:01:16
-Fold 0
-Model 0 best validation rmse = 0.132296 on epoch 9
-Model 0 test rmse = 0.333650
-Ensemble test rmse = 0.193032
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.193032
-Overall test rmse = 0.193032 +/- 0.000000
-Elapsed time = 0:01:15
-Fold 0
-Model 0 best validation auc = 0.883312 on epoch 5
-Warning: Found a task with targets all 0s or all 1s
-Model 0 test auc = 0.896446
-Warning: Found a task with targets all 0s or all 1s
-Ensemble test auc = nan
-1-fold cross validation
-	Seed 42 ==> test auc = nan
-Overall test auc = nan +/- nan
-Elapsed time = 0:01:16
-Fold 0
-Model 0 best validation rmse = 0.175435 on epoch 9
-Model 0 test rmse = 0.271831
-Ensemble test rmse = 0.144726
-1-fold cross validation
-	Seed 42 ==> test rmse = 0.144726
-Overall test rmse = 0.144726 +/- 0.000000
-Elapsed time = 0:01:16
-Fold 0
-Model 0 best validation auc = 0.834069 on epoch 3
-Model 0 test auc = 0.835755
-Ensemble test auc = 0.835755
-1-fold cross validation
-	Seed 42 ==> test auc = 0.835755
-Overall test auc = 0.835755 +/- 0.000000
-Elapsed time = 0:01:17
+	Seed 42 ==> test rmse = 0.826890
+Overall test rmse = 0.826890 +/- 0.000000
+Elapsed time = 0:06:58

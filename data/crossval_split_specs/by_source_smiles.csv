@@ -1,0 +1,3 @@
+Data_types_for_component,Values,Data_type_for_split,Train_or_split
+Source,external,smiles,split
+Source,internal,smiles,split

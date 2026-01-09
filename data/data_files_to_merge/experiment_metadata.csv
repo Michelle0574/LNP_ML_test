@@ -1,26 +1,26 @@
-Experiment_ID,Purity,Mix_type,Cargo_type,Experimenter_ID,Model_type,Target_or_delivered_gene,Delivery_target,Route_of_administration,Experiment_weight,Library_ID,Goal,Batch_or_individual_or_barcoded,Value_name,screen_id
-A549_form_screen,Pure,Hand,mRNA,jwitten,A549,FFL,a549,in_vitro,1,,max,Individual,log luminescence,A549_form_screen
-Whitehead_siRNA,Crude,Hand,siRNA,kwhitehead,,,,,1,whitehead_lipidoid,max,Individual,,Whitehead_siRNA
-Primary_ALI_culture,Pure,Hand,mRNA,jwitten,HBEC_ALI,FFL,lung_epithelium,in_vitro,2,,max,Individual,Rel. log lum,Primary_ALI_culture
-A549_RNP,Pure,Hand,RNP,jwitten,A549,Cas9,a549,in_vitro,1,,max,Individual,% knockout,A549_RNP
-LM_3CR,Crude,Hand,mRNA,lmiao,HeLa,FFL,hela,in_vitro,1,LM_3CR,max,Individual,log luminescence,LM_3CR
-RM_BL_AG_carbonate,,,mRNA,bli_agordon,,FFL,,,,RM_carbonate,max,,log luminescence,RM_BL_AG_carbonate
-Luke_Raj_133_3_form,Pure,Microfluidic,mRNA,lrhym,Mouse,Peptide_barcode,liver,iv,3,RM_Michael_addition_branched_133_form,max,Barcoded,Peptide abundance,Luke_Raj_133_3_form
-Luke_Raj_Branched_ester,Pure,Microfluidic,mRNA,lrhym,Mouse,Peptide_barcode,liver,iv,3,RM_Michael_addition_branched,max,Barcoded,Peptide abundance,Luke_Raj_Branched_ester
-IR_BL_AG_4CR,Crude,Hand,mRNA,bli_agordon,,FFL,,,,IR_4CR_aldehyde,max,Individual,log luminescence,
-IR_BL_AG_3CR_sting,Crude,Hand,mRNA,bli_agordon,HeLa,FFL,hela,in_vitro,1,IR_3CR_sting,max,Individual,log luminescence,IR_BL_AG_3CR_sting
-Akinc_Michael_addition,Crude,Hand,siRNA,akinc,HeLa,FFL,hela,in_vitro,1,Akinc_Michael,max,Individual,FFL silencing,Akinc_Michael
-Li_Thiolyne,Crude,Hand,pDNA,li,HEK293T,GFP,hek,in_vitro,1,Li_Thiolyne,max,Individual,GFP delivery,Li_Thiolyne
-Liu_Phospholipids,Crude,Hand,mRNA,liu,IGROV1,FFL,igrov1,in_vitro,1,Liu_iPhos,max,Individual,Luminescence,Liu_iPhos
-Miller_zwitter_lipids,Crude,Hand,siRNA,miller,HeLa,FFL,hela,in_vitro,1,Miller_ZAL,max,Individual,FFL silencing,Miller_ZAL
-Zhou_dendrimer,Crude,Hand,siRNA,zhou,,,,,,Zhou_dendrimer,max,Individual,,Zhou_dendrimer
-Lee_unsat_dendrimer,Pure,Hand,mRNA,lee,IGROV1,FFL,igrov1,in_vitro,1,Lee_unsat_dendrimer,max,Individual,Luminescence,Lee_unsat_dendrimer
-Raj_Jacob_ML_branched_ester,Pure,Microfluidic,mRNA,jwitten,Mouse,FFL,,,3,RM_Michael_addition_branched,max,Individual,log luminescence,JW_RM_ML_branched_ester
-IR_4CR_ketone,Pure,,mRNA,jwitten,,FFL,,,,4CR_Ketone,max,Individual,log luminescence,JW_IR_ML_4CR_ketone
-AGILE_3CR,Crude,Hand,mRNA,xu,,FFL,,in_vitro,1,Agile_3CR,max,Individual,Luminescence,AGILE_3CR
-Yan_aza_michael,Pure,Hand,mRNA,yan,IGROV1,FFL,igrov1,in_vitro,1,Yan_aza_michael,max,Individual,Luminescence,Yan_aza_michael
-Sanofi_goods,Pure,Microfluidic,mRNA,goldman,Mouse,hEPO,muscle,im,3,Sanofi_goods,max,Individual,hEPO,Sanofi_goods
-Li_enzyme_catalyzed,Pure,Hand,mRNA,li_enzyme,HEK293T,FFL,generic_cell,in_vitro,1,Li_enzyme_catalyzed,max,Individual,Luminescence,Li_enzyme_catalyzed
-He_4CR_aldehyde,Pure,Hand,mRNA,he_chem,Mouse,FFL,,iv,3,He_4CR_aldehyde,max,Individual,log luminescence,He_4CR_aldehyde
-Chen_disulfide,Pure,Hand,mRNA,chen_disulfide,,FFL,,,,Chen_disulfide,max,Individual,,Chen_disulfide
-Chinese_Academy_of_Sciences,Pure,Microfluidic,mRNA,ccchina,,FFL,,,,Chinese_Academy_of_Sciences,max,Individual,luminescence,Chinese_Academy_of_Sciences
+Experiment_ID,Purity,Mix_type,Cargo_type,Experimenter_ID,Model_type,Target_or_delivered_gene,Delivery_target,Route_of_administration,Experiment_weight,Library_ID,Goal,Batch_or_individual_or_barcoded,Value_name,screen_id,Source
+A549_form_screen,Pure,Hand,mRNA,jwitten,A549,FFL,a549,in_vitro,1.0,,max,Individual,log luminescence,A549_form_screen,external
+Whitehead_siRNA,Crude,Hand,siRNA,kwhitehead,,,,,1.0,whitehead_lipidoid,max,Individual,,Whitehead_siRNA,external
+Primary_ALI_culture,Pure,Hand,mRNA,jwitten,HBEC_ALI,FFL,lung_epithelium,in_vitro,2.0,,max,Individual,Rel. log lum,Primary_ALI_culture,external
+A549_RNP,Pure,Hand,RNP,jwitten,A549,Cas9,a549,in_vitro,1.0,,max,Individual,% knockout,A549_RNP,external
+LM_3CR,Crude,Hand,mRNA,lmiao,HeLa,FFL,hela,in_vitro,1.0,LM_3CR,max,Individual,log luminescence,LM_3CR,external
+RM_BL_AG_carbonate,,,mRNA,bli_agordon,,FFL,,,,RM_carbonate,max,,log luminescence,RM_BL_AG_carbonate,external
+Luke_Raj_133_3_form,Pure,Microfluidic,mRNA,lrhym,Mouse,Peptide_barcode,liver,iv,3.0,RM_Michael_addition_branched_133_form,max,Barcoded,Peptide abundance,Luke_Raj_133_3_form,external
+Luke_Raj_Branched_ester,Pure,Microfluidic,mRNA,lrhym,Mouse,Peptide_barcode,liver,iv,3.0,RM_Michael_addition_branched,max,Barcoded,Peptide abundance,Luke_Raj_Branched_ester,external
+IR_BL_AG_4CR,Crude,Hand,mRNA,bli_agordon,,FFL,,,,IR_4CR_aldehyde,max,Individual,log luminescence,,external
+IR_BL_AG_3CR_sting,Crude,Hand,mRNA,bli_agordon,HeLa,FFL,hela,in_vitro,1.0,IR_3CR_sting,max,Individual,log luminescence,IR_BL_AG_3CR_sting,external
+Akinc_Michael_addition,Crude,Hand,siRNA,akinc,HeLa,FFL,hela,in_vitro,1.0,Akinc_Michael,max,Individual,FFL silencing,Akinc_Michael,external
+Li_Thiolyne,Crude,Hand,pDNA,li,HEK293T,GFP,hek,in_vitro,1.0,Li_Thiolyne,max,Individual,GFP delivery,Li_Thiolyne,external
+Liu_Phospholipids,Crude,Hand,mRNA,liu,IGROV1,FFL,igrov1,in_vitro,1.0,Liu_iPhos,max,Individual,Luminescence,Liu_iPhos,external
+Miller_zwitter_lipids,Crude,Hand,siRNA,miller,HeLa,FFL,hela,in_vitro,1.0,Miller_ZAL,max,Individual,FFL silencing,Miller_ZAL,external
+Zhou_dendrimer,Crude,Hand,siRNA,zhou,,,,,,Zhou_dendrimer,max,Individual,,Zhou_dendrimer,external
+Lee_unsat_dendrimer,Pure,Hand,mRNA,lee,IGROV1,FFL,igrov1,in_vitro,1.0,Lee_unsat_dendrimer,max,Individual,Luminescence,Lee_unsat_dendrimer,external
+Raj_Jacob_ML_branched_ester,Pure,Microfluidic,mRNA,jwitten,Mouse,FFL,,,3.0,RM_Michael_addition_branched,max,Individual,log luminescence,JW_RM_ML_branched_ester,external
+IR_4CR_ketone,Pure,,mRNA,jwitten,,FFL,,,,4CR_Ketone,max,Individual,log luminescence,JW_IR_ML_4CR_ketone,external
+AGILE_3CR,Crude,Hand,mRNA,xu,,FFL,,in_vitro,1.0,Agile_3CR,max,Individual,Luminescence,AGILE_3CR,external
+Yan_aza_michael,Pure,Hand,mRNA,yan,IGROV1,FFL,igrov1,in_vitro,1.0,Yan_aza_michael,max,Individual,Luminescence,Yan_aza_michael,external
+Sanofi_goods,Pure,Microfluidic,mRNA,goldman,Mouse,hEPO,muscle,im,3.0,Sanofi_goods,max,Individual,hEPO,Sanofi_goods,external
+Li_enzyme_catalyzed,Pure,Hand,mRNA,li_enzyme,HEK293T,FFL,generic_cell,in_vitro,1.0,Li_enzyme_catalyzed,max,Individual,Luminescence,Li_enzyme_catalyzed,external
+He_4CR_aldehyde,Pure,Hand,mRNA,he_chem,Mouse,FFL,,iv,3.0,He_4CR_aldehyde,max,Individual,log luminescence,He_4CR_aldehyde,external
+Chen_disulfide,Pure,Hand,mRNA,chen_disulfide,,FFL,,,,Chen_disulfide,max,Individual,,Chen_disulfide,external
+Chinese_Academy_of_Sciences,Pure,Microfluidic,mRNA,ccchina,,FFL,,,,Chinese_Academy_of_Sciences,max,Individual,luminescence,Chinese_Academy_of_Sciences,internal

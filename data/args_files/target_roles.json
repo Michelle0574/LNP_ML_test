@@ -8,23 +8,18 @@
     "Biodistribution_muscle",
     "Biodistribution_spleen",
     "quantified_delivery",
-    "quantified_total_luminescence"
+    "quantified_total_luminescence",
+    "unnormalized_delivery",
+    "size"
   ],
   "classification_targets": [
-    "Delivery_target_dendritic_cell",
-    "Delivery_target_generic_cell",
-    "Delivery_target_liver",
-    "Delivery_target_lung",
-    "Delivery_target_lung_epithelium",
-    "Delivery_target_lymph_nodes",
-    "Delivery_target_macrophage",
-    "Delivery_target_muscle",
-    "Delivery_target_spleen",
     "Encapsulation_Efficiency_50<=EE<80",
     "Encapsulation_Efficiency_80<EE<=100",
     "Encapsulation_Efficiency_EE<50",
-    "acute_toxicity_none",
-    "acute_toxicity_present",
-    "chronic_toxicity_none"
+    "PDI_0_0to0_2",
+    "PDI_0_2to0_3",
+    "PDI_0_3to0_4",
+    "PDI_0_4to0_5",
+    "toxic"
   ]
 }
